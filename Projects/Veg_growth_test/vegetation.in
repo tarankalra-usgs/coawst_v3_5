@@ -55,13 +55,13 @@
 
     SCARP_HGHT == 0.27d0
 
-    NTIMES_MARSH == 3
+    NTIMES_MARSH == 30
 
     PAR_FAC1 == -0.7372d0
  
     PAR_FAC2 == 0.092d0
 
-    TDAYS_MARSH_GROWTH == 180.0d0
+    TDAYS_MARSH_GROWTH == 180
 
     MARSH_BULK_DENS == 300.0d0 
 
@@ -99,8 +99,6 @@ Hout(idTtot)   == F       ! Thrust_total       Total thrust from all direction d
 Hout(idTmfo)   == F       ! marsh_flux_out     Marsh sediment flux out from marsh cells
 Hout(idTmmr)   == F       ! marsh_retreat      Amount of marsh retreat from all directions
 
-Hout(idTzmx)   == F       ! zeta_max_rec       Record maximum water level for tidal range calculations
-Hout(idTzmn)   == F       ! zeta_min_rec       Record minimum water level for tidal range calculations
 Hout(idTmtr)   == F       ! marsh_tidal_range  Tidal range for vertical growth for marsh cells
 Hout(idTmhw)   == F       ! marsh_high_water   Mean high water for marsh cells
 Hout(idTmvg)   == F       ! marsh_vert         Amount of vertical growth for marsh cells
