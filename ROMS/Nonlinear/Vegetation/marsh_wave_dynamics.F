@@ -35,7 +35,7 @@
 !     --> marsh_vert_growth.F                                          !
 !                                                                      !
 !  References:                                                         !   
-!  Kalra, T.S., Ganju, N.K., Aretxabaleta, A., Moriarity, J.M.,        !
+!  Kalra, T.S., Ganju, N.K., Aretxabaleta, A., Moriarty, J.M.,         !
 !  Aretxabaleta, A., Warner, J.C., Carr, J., Nicoletta, L.,            !
 !  Modeling Marsh Dynamics Using a 3-D Coupled Wave-Flow-Sediment      !
 !  Model (In process).                                                 !
