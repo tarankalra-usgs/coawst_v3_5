@@ -50,6 +50,7 @@
 !                DimIDs(31) => Number of 2D variables time levels (3). !
 !                DimIDs(32) => Number of sediment tracers.             !
 !                DimIDs(33) => Number of wave directions.              !
+!                DimIDs(34) => Number of spectral bands.               !
 !                DimIDs(35) => Number of vegetation properties.        !
 !                                                                      !
 !  On Output:                                                          !

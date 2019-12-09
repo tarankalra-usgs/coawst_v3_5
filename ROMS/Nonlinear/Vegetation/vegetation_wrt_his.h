@@ -30,7 +30,8 @@
 #  endif
      &                       VEG(ng) % plant(:,:,:,i),                  &
      &                       SetFillVal= .FALSE.)
-          IF (status.ne.nf90_noerr) THEN 
+	  IF (FoundError(status, nf90_noerr, __LINE__,                    &
+       &                   __FILE__)) THEN
             IF (Master) THEN 
               WRITE (stdout,10) TRIM(Vname(1,idvprp(i))), HIS(ng)%Rindex
             END IF
@@ -176,58 +177,6 @@
 !
 #  if defined MARSH_TIDAL_RANGE
 !
-!  Write out maximum water level to get max tidal range. 
-!
-      IF (Hout(idTzmx,ng)) THEN
-        scale=1.0_r8
-        gtype=gfactor*r3dvar
-        status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTzmx), &
-     &                     HIS(ng)%Rindex, gtype,                       &
-     &                     LBi, UBi, LBj, UBj, 1, NTIMES_MARSH, scale,  &
-#   ifdef MASKING
-#    ifdef WET_DRY
-     &                     GRID(ng) % rmask_full,                       &
-#    else
-     &                     GRID(ng) % rmask,                            &
-#    endif
-#   endif
-     &                     VEG(ng) % zeta_max_rec)
-        IF (status.ne.nf90_noerr) THEN
-          IF (Master) THEN
-            WRITE (stdout,10) TRIM(Vname(1,idTzmx)), HIS(ng)%Rindex
-          END IF
-          exit_flag=3
-          ioerror=status
-          RETURN
-        END IF
-      END IF
-!
-!  Write out minimum water level to get max tidal range. 
-!
-      IF (Hout(idTzmn,ng)) THEN
-        scale=1.0_r8
-        gtype=gfactor*r3dvar
-        status=nf_fwrite3d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTzmn), &
-     &                     HIS(ng)%Rindex, gtype,                       &
-     &                     LBi, UBi, LBj, UBj, 1, NTIMES_MARSH, scale,  &
-#   ifdef MASKING
-#    ifdef WET_DRY
-     &                     GRID(ng) % rmask_full,                       &
-#    else
-     &                     GRID(ng) % rmask,                            &
-#    endif
-#   endif
-     &                     VEG(ng) % zeta_min_rec)
-        IF (status.ne.nf90_noerr) THEN
-          IF (Master) THEN
-            WRITE (stdout,10) TRIM(Vname(1,idTzmn)), HIS(ng)%Rindex
-          END IF
-          exit_flag=3
-          ioerror=status
-          RETURN
-        END IF
-      END IF
-!
 !  Write tidal range over a given frequency.
 !
       IF (Hout(idTmtr,ng)) THEN
@@ -239,9 +188,9 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_tidal_range,                   & 
-     &                     SetFillVAl= .FALSE.)
-        IF (status.ne.nf90_noerr) THEN
+     &                     VEG(ng)%marsh_tidal_range)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idTmtr)), HIS(ng)%Rindex
           END IF
@@ -262,9 +211,9 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_high_water,                    & 
-     &                     SetFillVAl= .FALSE.)
-        IF (status.ne.nf90_noerr) THEN
+     &                     VEG(ng)%marsh_high_water) 
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idTmhw)), HIS(ng)%Rindex
           END IF
@@ -287,9 +236,9 @@
 #    ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #    endif
-     &                     VEG(ng)%marsh_biomass_peak,                  & 
-     &                     SetFillVAl= .FALSE.)
-        IF (status.ne.nf90_noerr) THEN
+     &                     VEG(ng)%marsh_biomass_peak)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idTmbp)), HIS(ng)%Rindex
           END IF
@@ -310,9 +259,9 @@
 #    ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #    endif
-     &                     VEG(ng)%marsh_vert,                          & 
-     &                     SetFillVAl= .FALSE.)
-        IF (status.ne.nf90_noerr) THEN
+     &                     VEG(ng)%marsh_vert)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idTmvg)), HIS(ng)%Rindex
           END IF
@@ -321,65 +270,6 @@
           RETURN
         END IF
       END IF
-#   endif  ! end of marsh vertical growth
-#  endif  ! end of marsh tidal range 
+#   endif 
+#  endif  
 # endif  
-! end of marsh wave erosion
-!
-!
-!      DO i=1,NTIMES_MARSH
-!        IF (Hout(idTzmx(i),ng)) THEN
-!          scale=1.0_r8
-!          gtype=gfactor*r2dvar
-!          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
-!     &                       HIS(ng)%Vid(idTzmx(i)),                    &
-
-!      DO i=1,NTIMES_MARSH
-!        IF (Hout(idTzmx(i),ng)) THEN
-!          scale=1.0_r8
-!          gtype=gfactor*r2dvar
-!          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
-!     &                       HIS(ng)%Vid(idTzmx(i)),                    &
-!     &                       HIS(ng)%Rindex, gtype,                     &
-!     &                       LBi, UBi, LBj, UBj, scale,                 &
-!#   ifdef MASKING
-!     &                       GRID(ng) % rmask,                          &
-!#   endif
-!     &                       VEG(ng) % zeta_max_rec(:,:,i),             &
-!     &                       SetFillVAl= .FALSE.)
-!          IF (status.ne.nf90_noerr) THEN
-!            IF (Master) THEN
-!              WRITE (stdout,10) TRIM(Vname(1,idTzmx(i))), HIS(ng)%Rindex
-!            END IF
-!            exit_flag=3
-!            ioerror=status
-!            RETURN
-!          END IF
-!        END IF
-!      END DO
-!
-!  Write out minimum water level to get max tidal range. 
-!
-!      DO i=1,NTIMES_MARSH
-!        IF (Hout(idTzmn(i),ng)) THEN
-!          scale=1.0_r8
-!          gtype=gfactor*r2dvar
-!          status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid,                    &
-!     &                       HIS(ng)%Vid(idTzmn(i)),                    &
-!     &                       HIS(ng)%Rindex, gtype,                     &
-!     &                       LBi, UBi, LBj, UBj, scale,                 &
-!#   ifdef MASKING
-!     &                       GRID(ng) % rmask,                          &
-!#   endif
-!     &                       VEG(ng) % zeta_min_rec(:,:,i),             &
-!     &                       SetFillVAl= .FALSE.)
-!          IF (status.ne.nf90_noerr) THEN
-!            IF (Master) THEN
-!              WRITE (stdout,10) TRIM(Vname(1,idTzmn(i))), HIS(ng)%Rindex
-!            END IF
-!            exit_flag=3
-!            ioerror=status
-!            RETURN
-!          END IF
-!!        END IF
-!      END DO

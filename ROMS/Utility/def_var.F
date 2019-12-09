@@ -905,9 +905,6 @@
             IF (((ABS(INT(Aval(5))).le.4).and.(nVdim.gt.2)).or.         &
      &          ((ABS(INT(Aval(5))).gt.4).and.(nVdim.gt.3))) THEN
               text=text(1:latt)//' ocean_time'
-# if defined MARSH_TIDAL_RANGE
-              text=text(1:latt)//' NTIMES_MARSH'
-# endif
               latt=LEN_TRIM(text)
             END IF
             status=nf90_put_att(ncid, Vid, TRIM(Vinfo(22)),             &

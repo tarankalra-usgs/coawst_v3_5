@@ -51,17 +51,17 @@
 
     VEGHMIXCOEF == 0.1d0
 
-    KFAC_MARSH ==0.6d-4 ! 0.6d-9
+    KFAC_MARSH == 0.6d-9
 
     SCARP_HGHT == 0.27d0
 
-    NTIMES_MARSH == 3
+    NTIMES_MARSH == 30
 
     PAR_FAC1 == -0.7372d0
  
     PAR_FAC2 == 0.092d0
 
-    TDAYS_MARSH_GROWTH == 180.0d0
+    TDAYS_MARSH_GROWTH == 180 
 
     MARSH_BULK_DENS == 300.0d0 
 
@@ -99,9 +99,7 @@ Hout(idTtot)   == T       ! Thrust_total       Total thrust from all direction d
 Hout(idTmfo)   == T       ! marsh_flux_out     Marsh sediment flux out from marsh cells
 Hout(idTmmr)   == F       ! marsh_retreat      Amount of marsh retreat from all directions
 
-Hout(idTzmx)   == T       ! zeta_max_rec       Record maximum water level for tidal range calculations
-Hout(idTzmn)   == T       ! zeta_min_rec       Record minimum water level for tidal range calculations
-Hout(idTmtr)   == F       ! marsh_tidal_range  Tidal range for vertical growth for marsh cells
+Hout(idTmtr)   == T       ! marsh_tidal_range  Tidal range for vertical growth for marsh cells
 Hout(idTmhw)   == T       ! marsh_high_water   Mean high water for marsh cells
 Hout(idTmvg)   == T       ! marsh_vert         Amount of vertical growth for marsh cells
 Hout(idTmbp)   == T       ! marsh_biomass_peak Amount of marsh biomass peak
@@ -125,7 +123,7 @@ Hout(idTmbp)   == T       ! marsh_biomass_peak Amount of marsh biomass peak
 ! 
 !  SCARP_HGHT     Scarp height after which marsh mask converts from 1 to 0 (m). 
 ! 
-!  NTIMES_MARSH   Number of days to record mean high water for marsh vertical growth (typically 30 days).
+!  NTIMES_MARSH   Number of days prior to record mean high water for marsh vertical growth (typically 30 days).
 !
 !  NUGP           Fraction of below ground biomass. 
 !  

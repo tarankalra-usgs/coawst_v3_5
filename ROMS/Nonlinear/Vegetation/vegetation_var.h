@@ -80,10 +80,6 @@
               idTmsc=varid
 # endif 
 # if defined MARSH_TIDAL_RANGE
-	    CASE('idTzmx')
-	      idTzmx=varid
-	    CASE('idTzmn')
-	      idTzmn=varid
 	    CASE('idTmtr')
 	      idTmtr=varid
 	    CASE('idTmhw')

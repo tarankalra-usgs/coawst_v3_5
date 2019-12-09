@@ -71,8 +71,6 @@
 !                                                                      !
 !  Marsh vertical growth model:                                        !
 !  ==============================                                      !
-!  idTzmx        Mean high high water (MHHW)                           ! 
-!  idTzmn        Mean low low water (MLLW)                             !
 !  idTmtr        Mean tidal range  (MHHW-MLLW)                         !  
 !  idTmhw        Mean high high water (MHWW)                           !
 !  idTmbp        Below ground biomass for marsh growth                 !
@@ -112,7 +110,6 @@
 # endif 
 # if defined MARSH_TIDAL_RANGE
       integer ::  NTIMES_MARSH
-      integer ::  idTzmx, idTzmn
       integer ::  idTmtr, idTmhw 
 #  if defined MARSH_VERT_GROWTH
       integer :: idTmbp

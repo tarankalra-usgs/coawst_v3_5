@@ -2874,6 +2874,7 @@
 #endif
 !
 #if defined ESTUARYBGC && defined SPECTRAL_LIGHT 
+!
 !  Write out Photosynthetically Available Radiation (PAR)
 !
       IF (Hout(idPARo,ng)) THEN

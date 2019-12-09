@@ -158,44 +158,8 @@
         END IF
 #   endif  
 #  endif  
-# endif    ! end of marsh wave thrust
+# endif 
 # ifdef MARSH_TIDAL_RANGE 
-!
-!  Maximum of water level to find the tidal range. 
-!
-        IF (Hout(idTzmx,ng)) THEN
-          Vinfo( 1)=Vname(1,idTzmx)
-          Vinfo( 2)=Vname(2,idTzmx)
-          Vinfo( 3)=Vname(3,idTzmx)
-          Vinfo(14)=Vname(4,idTzmx)
-          Vinfo(16)=Vname(1,idtime)
-#  if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-#  endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idTzmx,ng),r8)
-          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTzmx),   &
-     &                   NF_FOUT, nvd3, m2dgrd, Aval, Vinfo, ncname)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
-!  Minimum of water level to find the tidal range. 
-!
-        IF (Hout(idTzmn,ng)) THEN
-          Vinfo( 1)=Vname(1,idTzmn)
-          Vinfo( 2)=Vname(2,idTzmn)
-          Vinfo( 3)=Vname(3,idTzmn)
-          Vinfo(14)=Vname(4,idTzmn)
-          Vinfo(16)=Vname(1,idtime)
-#  if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-#  endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idTzmn,ng),r8)
-          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTzmn),   &
-     &                   NF_FOUT, nvd3, m2dgrd, Aval, Vinfo, ncname)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF 
 !
 !  Amount of marsh tidal range over a given frequency. 
 !
@@ -270,57 +234,6 @@
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
         END IF
-#  endif ! end of marsh vertical growth
-# endif  ! end of marsh tidal range
+#  endif 
+# endif  
 #endif   
-!                        
-!        DO i=1,NTIMES_MARSH
-!          IF (Hout(idTzmx(i),ng)) THEN
-!            Vinfo( 1)=Vname(1,idTzmx(i))
-!            Vinfo( 2)=Vname(2,idTzmx(i))
-!            Vinfo( 3)=Vname(3,idTzmx(i))
-!            Vinfo(14)=Vname(4,idTzmx(i))
-!            Vinfo(16)=Vname(1,idtime)
-!#  if defined WRITE_WATER && defined MASKING
-!            Vinfo(20)='mask_rho'
-
-
-!        DO i=1,NTIMES_MARSH
-!          IF (Hout(idTzmx(i),ng)) THEN
-!            Vinfo( 1)=Vname(1,idTzmx(i))
-!            Vinfo( 2)=Vname(2,idTzmx(i))
-!            Vinfo( 3)=Vname(3,idTzmx(i))
-!            Vinfo(14)=Vname(4,idTzmx(i))
-!            Vinfo(16)=Vname(1,idtime)
-!#  if defined WRITE_WATER && defined MASKING
-!            Vinfo(20)='mask_rho'
-!#  endif
-!            Vinfo(22)='coordinates'
-!            Aval(5)=REAL(Iinfo(1,idTzmx(i),ng))
-!            status=def_var(ng, iNLM, HIS(ng)%ncid,                      &
-!     &                     HIS(ng)%Vid(idTzmx(i)), NF_FOUT,             &
-!     &                     nvd3, t2dgrd, Aval, Vinfo, ncname)
-!            IF (exit_flag.ne.NoError) RETURN
-!          END IF
-!        END DO
-!
-!  Minimum of water level to find the tidal range. 
-!
-!        DO i=1,NTIMES_MARSH
-!          IF (Hout(idTzmn(i),ng)) THEN
-!            Vinfo( 1)=Vname(1,idTzmn(i))
-!            Vinfo( 2)=Vname(2,idTzmn(i))
-!            Vinfo( 3)=Vname(3,idTzmn(i))
-!            Vinfo(14)=Vname(4,idTzmn(i))
-!            Vinfo(16)=Vname(1,idtime)
-!#  if defined WRITE_WATER && defined MASKING
-!            Vinfo(20)='mask_rho'
-!#  endif
-!            Vinfo(22)='coordinates'
-!            Aval(5)=REAL(Iinfo(1,idTzmn(i),ng))
-!            status=def_var(ng, iNLM, HIS(ng)%ncid,                      &
-!     &                     HIS(ng)%Vid(idTzmn(i)), NF_FOUT,             &
-!     &                     nvd3, t2dgrd, Aval, Vinfo, ncname)
-!            IF (exit_flag.ne.NoError) RETURN
-!          END IF
-!        END DO

@@ -9510,6 +9510,7 @@
   'idTmmr'
   'r2dvar' 
    1.0d0
+
 'marsh_scrp_hght'                                  ! Output
   'Scarp height '
   'm'     
@@ -9517,24 +9518,6 @@
   'ocean_time'
   'idTmsc'
   'r2dvar' 
-   1.0d0
-
-'zeta_max_rec'                                    ! Output
-  'Record the maximum water level in a given day.' 
-  'm'                                              ! [m]
-  'zeta_max_rec, scalar, series'
-  'ntimes_marsh'
-  'idTzmx'
-  'r2dvar'
-   1.0d0
-
-'zeta_min_rec'                                    ! Output
-  'Record the minimum water level in a given day.' 
-  'm'                                             ! [m]
-  'zeta_min_rec, scalar, series'
-  'ntimes_marsh'
-  'idTzmn'
-  'r2dvar'
    1.0d0
 
 'marsh_tidal_range'                               ! Output

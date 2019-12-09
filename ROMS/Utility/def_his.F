@@ -65,8 +65,6 @@
 
 #if defined VEGETATION && (defined VEG_DRAG || defined VEG_BIOMASS)
       integer :: DimIDs(35)
-# elif defined MARSH_TIDAL_RANGE
-      integer :: DimIDs(35)
 # elif defined ESTUARYBGC 
       integer :: DimIDs(34)
 #elif defined INWAVE_MODEL
@@ -94,9 +92,6 @@
 #if defined VEGETATION 
 # if defined VEG_DRAG || defined VEG_BIOMASS
       integer :: v3pgrd(4)
-# endif
-# if defined MARSH_TIDAL_RANGE
-      integer :: m2dgrd(3)
 # endif
 #endif
       integer :: t3dgrd(4), u3dgrd(4), v3dgrd(4), w3dgrd(4)
@@ -332,12 +327,8 @@
 # if defined VEG_DRAG || defined VEG_BIOMASS
         status=def_dim(ng, iNLM, HIS(ng)%ncid, ncname, 'NVEG',          &
      &                 NVEG, DimIDs(35))
-        IF (exit_flag.ne.NoError) RETURN
-# endif 
-# if defined MARSH_TIDAL_RANGE 
-        status=def_dim(ng, iNLM, HIS(ng)%ncid, ncname, 'NTIMES_MARSH',  &
-     &                 NTIMES_MARSH, DimIDs(35))
-        IF (exit_flag.ne.NoError) RETURN
+        IF (FoundError(exit_flag, NoError, __LINE__,                    &
+     &                 __FILE__)) RETURN
 # endif 
 #endif
 
@@ -440,11 +431,6 @@
         v3pgrd(2)=DimIDs( 5)
         v3pgrd(3)=DimIDs(35)
         v3pgrd(4)=DimIDs(12)
-# endif 
-# if defined MARSH_TIDAL_RANGE
-        m2dgrd(1)=DimIDs( 1)
-        m2dgrd(2)=DimIDs( 5)
-        m2dgrd(3)=DimIDs(35)
 # endif 
 #endif 
 !
@@ -590,7 +576,8 @@
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
 #endif
-#if defined SEDIMENT && defined SED_MORPH
+#if defined SEDIMENT && ( defined SED_MORPH    \               
+                         || defined MARSH_BIOMASS_MORPH )
 !
 !  Define time-varying bathymetry.
 !
@@ -607,24 +594,6 @@
      &                   SetFillVal = .FALSE.)
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
-        END IF
-#endif
-#if defined SED_MORPH_MARSH 
-!
-!  Define time-varying bathymetry.
-!
-        IF (Hout(idbath,ng)) THEN
-          Vinfo( 1)=Vname(1,idbath)
-          Vinfo( 2)=Vname(2,idbath)
-          Vinfo( 3)=Vname(3,idbath)
-          Vinfo(14)=Vname(4,idbath)
-          Vinfo(16)=Vname(1,idtime)
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idbath,ng),r8)
-          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idbath),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname,    &
-     &                   SetFillVal = .FALSE.)
-          IF (exit_flag.ne.NoError) RETURN
         END IF
 #endif
 #ifdef WET_DRY
@@ -1723,7 +1692,7 @@
         END IF
 # endif
 # if defined BULK_FLUXES || defined ECOSIM || defined ATM_PRESS \
-  || defined ATM2OCN_FLUXES || defined CCSM_FLUXES2D
+     || defined ATM2OCN_FLUXES || defined CCSM_FLUXES2D
 !
 !  Define surface air pressure.
 !
@@ -2027,7 +1996,8 @@
 #endif
 !
 # if defined ESTUARYBGC && defined SPECTRAL_LIGHT
-!  Define Photosynthetically Available Radiation (PAR)
+!
+!  Define Photosynthetically Available Radiation (PAR).
 !
         IF (Hout(idPARo,ng)) THEN
           Vinfo( 1)=Vname(1,idPARo)
@@ -2045,7 +2015,8 @@
           IF (FoundError(exit_flag, NoError, __LINE__,                  &
      &                   __FILE__)) RETURN
         END IF
-!  Define Spectral Photosynthetically Available Radiation (PARs)
+!
+!  Define Spectral Photosynthetically Available Radiation (PARs).
 !
         IF (Hout(idPARs,ng)) THEN
           Vinfo( 1)=Vname(1,idPARs)
@@ -2124,7 +2095,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Define Dissolved Oxygen in water column
+!  Define Dissolved Oxygen in water column.
 !
         IF (Hout(iddowc,ng)) THEN 
           Vinfo( 1)=Vname(1,iddowc)
@@ -2143,7 +2114,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Define Dissolved Inorganic Nitrogen in water column due to SAV 
+!  Define Dissolved Inorganic Nitrogen in water column due to SAV.
 !
         IF (Hout(idwsvl,ng)) THEN 
           Vinfo( 1)=Vname(1,idwsvl)
@@ -2162,7 +2133,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Above ground biomass
+!  Define Above ground biomass.
 !
         IF (Hout(idsagb,ng)) THEN
           Vinfo( 1)=Vname(1,idsagb)
@@ -2181,7 +2152,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Below ground biomass.
+! Define Below ground biomass.
 !
         IF (Hout(idsbgb,ng)) THEN
           Vinfo( 1)=Vname(1,idsbgb)
@@ -2200,7 +2171,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  Epiphyte biomass
+! Define Epiphyte biomass.
 !
         IF (Hout(idsepb,ng)) THEN
           Vinfo( 1)=Vname(1,idsepb)
@@ -2219,7 +2190,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  PP
+! Define Primary production.
 !
         IF (Hout(idsvpp,ng)) THEN
           Vinfo( 1)=Vname(1,idsvpp)
@@ -2238,7 +2209,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  AGM
+!  Define above ground mortality. 
 !
         IF (Hout(idsvam,ng)) THEN
           Vinfo( 1)=Vname(1,idsvam)
@@ -2257,7 +2228,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  AGAR
+!  Define active respiration.
 !
         IF (Hout(idsgar,ng)) THEN
           Vinfo( 1)=Vname(1,idsgar)
@@ -2276,7 +2247,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  AGBR
+!  Define above ground basal respiration.
 !
         IF (Hout(idsvbr,ng)) THEN
           Vinfo( 1)=Vname(1,idsvbr)
@@ -2295,7 +2266,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-!  SEARS
+!  Define seasonal root storage of Carbon (SEARS).
 !
         IF (Hout(idsvrs,ng)) THEN
           Vinfo( 1)=Vname(1,idsvrs)
@@ -2314,7 +2285,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-! AGBG
+! Define translocation of above ground biomass to below ground (AGBG).
 ! 
         IF (Hout(idsvbg,ng)) THEN
           Vinfo( 1)=Vname(1,idsvbg)
@@ -2333,7 +2304,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-! BGAG
+! Define translocation of below ground biomass to above ground (BGAG).
 ! 
         IF (Hout(idsvag,ng)) THEN
           Vinfo( 1)=Vname(1,idsvag)
@@ -2352,7 +2323,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-! BGR 
+! Define below ground biomass respiration. 
 ! 
         IF (Hout(idsbgr,ng)) THEN
           Vinfo( 1)=Vname(1,idsbgr)
@@ -2371,7 +2342,7 @@
      &                   __FILE__)) RETURN
         END IF
 !
-! BGM
+! Define below ground mortality. 
 ! 
         IF (Hout(idsbgm,ng)) THEN
           Vinfo( 1)=Vname(1,idsbgm)
@@ -5187,15 +5158,6 @@
             END IF
           END DO
 # endif 
-# if defined MARSH_TIDAL_RANGE 
-          IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idTzmx))) THEN
-            got_var(idTzmx)=.TRUE.
-            HIS(ng)%Vid(idTzmx)=var_id(i)
-          ELSE IF (TRIM(var_name(i)).eq.TRIM(Vname(1,idTzmn))) THEN
-            got_var(idTzmn)=.TRUE.
-            HIS(ng)%Vid(idTzmn)=var_id(i)
-          END IF 
-# endif 
 #endif
 ! 
 #ifdef SOLVE3D
@@ -5271,15 +5233,8 @@
           exit_flag=3
           RETURN
         END IF
-#if defined SEDIMENT && defined SED_MORPH
-        IF (.not.got_var(idbath).and.Hout(idbath,ng)) THEN
-          IF (Master) WRITE (stdout,70) TRIM(Vname(1,idbath)),          &
-     &                                  TRIM(ncname)
-          exit_flag=3
-          RETURN
-        END IF
-#endif
-#if defined SED_MORPH_MARSH 
+#if defined SEDIMENT && ( defined SED_MORPH    \               
+                         || defined MARSH_BIOMASS_MORPH )
         IF (.not.got_var(idbath).and.Hout(idbath,ng)) THEN
           IF (Master) WRITE (stdout,70) TRIM(Vname(1,idbath)),          &
      &                                  TRIM(ncname)
@@ -6371,20 +6326,6 @@
           END IF
         END DO 
 #  endif
-#  if defined MARSH_TIDAL_RANGE
-        IF (.not.got_var(idTzmx).and.Hout(idTzmx,ng)) THEN
-          IF (Master) WRITE (stdout,70) TRIM(Vname(1,idTzmx)),          &
-     &                                  TRIM(ncname)
-          exit_flag=3
-          RETURN
-        END IF
-        IF (.not.got_var(idTzmn).and.Hout(idTzmn,ng)) THEN
-          IF (Master) WRITE (stdout,70) TRIM(Vname(1,idTzmn)),          &
-     &                                  TRIM(ncname)
-          exit_flag=3
-          RETURN
-        END IF
-#  endif 
 # endif 
 # ifdef SEDIMENT
         DO i=1,NST

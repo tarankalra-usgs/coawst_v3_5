@@ -176,6 +176,6 @@
      &                   NF_FRST, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
 #   endif 
-#  endif  ! end marsh sed erosion
-# endif   !end marsh wave thrust
+#  endif  
+# endif   
 #endif

@@ -41,10 +41,6 @@
       real(r8), allocatable :: Rveg(:,:)
 #endif 
       logical, dimension(NNS,Ngrids) :: Lsand1
-#if defined MARSH_TIDAL_RANGE 
-!      logical, allocatable :: Lmarsh_growth(:,:)
-!      logical, allocatable(:,:) :: Lmarsh_growth
-#endif 
 !
       character (len=40 ) :: KeyWord
       character (len=256) :: line 
@@ -164,13 +160,6 @@
                DO ng=1,Ngrids
                  MARSH_BULK_DENS(ng)=Rmarsh(ng)
                END DO
-!             CASE ('NTIMES_MARSH')
-!               IF (.not.allocated(NTIMES_MARSH))                        &
-!     &                allocate(NTIMES_MARSH(Ngrids))
-!                Npts=load_i(Nval, Rval, Ngrids, Rmarsh)
-!               DO ng=1,Ngrids
-!                 NTIMES_MARSH(ng)=Rmarsh(ng)
-!               END DO
              CASE ('NUGP')
                IF (.not.allocated(NUGP))                                &
      &                allocate(NUGP(Ngrids))
@@ -237,17 +226,6 @@
                END DO
 # endif 
 #endif 
-#if defined MARSH_TIDAL_RANGE
-!             IF (.not.allocated(Lmarsh_growth)) THEN
-!               allocate ( Lmarsh_growth(NTIMES_MARSH,Ngrids) )
-!             END IF
-!	     IF (.not.allocated(idTzmx)) THEN 
-!               allocate(idTzmx(NTIMES_MARSH))
-!	     END IF
-!	     IF (.not.allocated(idTzmn)) THEN 
-!               allocate(idTzmn(NTIMES_MARSH))
-!	     END IF
-#endif
 !
 !-----------------------------------------------------------------------
 !  Read output ids from vegetation.in
@@ -345,23 +323,6 @@
 #  endif 
 # endif 
 # ifdef MARSH_TIDAL_RANGE 
-!
-            CASE ('Hout(idTzmx)')
-              IF (idTzmx.eq.0) THEN
-                IF (Master) WRITE (out,40) 'idTzmx'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idTzmx,1:Ngrids))
-!
-            CASE ('Hout(idTzmn)')
-              IF (idTzmn.eq.0) THEN
-                IF (Master) WRITE (out,40) 'idTzmn'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idTzmn,1:Ngrids))
-!
             CASE ('Hout(idTmtr)')
               IF (idTmtr.eq.0) THEN
                 IF (Master) WRITE (out,40) 'idTmtr'
@@ -393,43 +354,6 @@
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmbp,1:Ngrids))
 #  endif 
-!            CASE ('Hout(idTzmx)')
-!              DO ng=1,Ngrids
-!                DO it=1,NTIMES_MARSH
-!!                  IF (idTzmx(it).eq.0) THEN
-!                    IF (Master) WRITE (out,30) 'idTzmx'
-!                    exit_flag=5
-!                    RETURN
-!                  END IF
-!                END DO
-!              END DO
-!              Npts=load_l(Nval, Cval, NTIMES_MARSH*Ngrids,              &
-!      &                               Lmarsh_growth)
-!              DO ng=1,Ngrids
-!                DO it=1,NTIMES_MARSH
-!                  i=idTzmx(it)
-!                  Hout(i,ng)=Lmarsh_growth(it,ng)
-!                END DO
-!              END DO
-!!
-!            CASE ('Hout(idTzmn)')
-!              DO ng=1,Ngrids
-!                DO it=1,NTIMES_MARSH
-!                  IF (idTzmn(it).eq.0) THEN
-!                    IF (Master) WRITE (out,30) 'idTzmn'
-!                    exit_flag=5
-!                    RETURN
-!                  END IF
-!                END DO
-!              END DO
-!              Npts=load_l(Nval, Cval, NTIMES_MARSH*Ngrids,              &
-!      &                                     Lmarsh_growth)
-!              DO ng=1,Ngrids
-!                DO it=1,NTIMES_MARSH
-!                  i=idTzmn(it)
-!                  Hout(i,ng)=Lmarsh_growth(it,ng)
-!                END DO
-!              END DO
 # endif 
 #endif
           END SELECT
