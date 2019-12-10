@@ -84,7 +84,7 @@
           Pair(i,j)=1025.0_r8
         END DO
       END DO
-#elif defined BL_TEST || VEG_GROWTH_TEST
+#elif defined BL_TEST || defined VEG_GROWTH_TEST
       DO j=JstrT,JendT
         DO i=IstrT,IendT
           Pair(i,j)=1013.48_r8
