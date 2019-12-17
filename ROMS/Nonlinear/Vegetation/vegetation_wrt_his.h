@@ -69,7 +69,7 @@
       END IF
 # endif
 ! 
-# ifdef MARSH_WAVE_DYNAMICS
+# ifdef MARSH_DYNAMICS
 !
 !  Write out masking for marsh cells. 
 ! 

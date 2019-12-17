@@ -57,7 +57,7 @@
           IF (exit_flag.ne.NoError) RETURN
         END IF 
 #endif 
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
 !
 !  Store masking marsh of marsh cells. 
 !
@@ -135,24 +135,6 @@
           Vinfo(22)='coordinates'
           Aval(5)=REAL(Iinfo(1,idTmmr,ng),r8)
           status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTmmr),   &
-     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
-          IF (exit_flag.ne.NoError) RETURN
-        END IF
-!
-!  Amount of marsh retreat from all directions.
-!
-        IF (Hout(idTmsc,ng)) THEN 
-          Vinfo( 1)=Vname(1,idTmsc)
-          Vinfo( 2)=Vname(2,idTmsc)
-          Vinfo( 3)=Vname(3,idTmsc)
-          Vinfo(14)=Vname(4,idTmsc)
-          Vinfo(16)=Vname(1,idtime)
-#    if defined WRITE_WATER && defined MASKING
-          Vinfo(20)='mask_rho'
-#    endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idTmsc,ng),r8)
-          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTmsc),   &
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
         END IF

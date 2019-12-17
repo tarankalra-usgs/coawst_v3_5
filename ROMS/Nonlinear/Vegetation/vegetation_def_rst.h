@@ -60,7 +60,7 @@
           IF (exit_flag.ne.NoError) RETURN
 #endif 
 !
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
 !
 !  Store marsh masking marsh from marsh cells. 
 !
@@ -152,27 +152,6 @@
           Vinfo(22)='coordinates'
           Aval(5)=REAL(Iinfo(1,idTmmr,ng),r8)
           status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idTmmr),   &
-     &                   NF_FRST, nvd3, t2dgrd, Aval, Vinfo, ncname)
-          IF (exit_flag.ne.NoError) RETURN
-!     
-!# ifdef MARSH_STOCH
-!
-          Vinfo( 1)=Vname(1,idTmsc)
-          Vinfo( 2)=Vname(2,idTmsc)
-          Vinfo( 3)=Vname(3,idTmsc)
-          Vinfo(14)=Vname(4,idTmsc)
-          Vinfo(16)=Vname(1,idtime)
-#    if defined WRITE_WATER && defined MASKING
-#     if defined PERFECT_RESTART
-        Vinfo(24)='_FillValue'
-        Aval(6)=spval
-#     else
-          Vinfo(20)='mask_rho'
-#     endif
-#    endif
-          Vinfo(22)='coordinates'
-          Aval(5)=REAL(Iinfo(1,idTmsc,ng),r8)
-          status=def_var(ng, iNLM, RST(ng)%ncid, RST(ng)%Vid(idTmsc),   &
      &                   NF_FRST, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
 #   endif 

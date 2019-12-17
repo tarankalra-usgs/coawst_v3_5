@@ -41,7 +41,7 @@
 !  BWDXL_veg      Wave streaming effect due to vegetation              !
 !  BWDYL_veg      Wave streaming effect due to vegetation              !
 #endif
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_WAVE_THRUST
 !  marsh_mask     Store marsh mask at cell centers of marsh cells      ! 
 !  umask_marsh    Store u face marsh boundary                          ! 
 !  vmask_marsh    Store v face marsh boundary                          ! 
@@ -52,8 +52,6 @@
 !  marsh_flux_out Total marsh flux out from a cell                     !
 #  endif                                                               
 #  if defined MARSH_RETREAT                                            
-!  dx_xi_retreat  Retreat in xi direction                              !
-!  dy_eta_retreat Retreat in eta direction                             !
 !  marsh_retreat  Amount of marsh retreat                              !
 #  endif                                                               
 #  if defined MARSH_TIDAL_RANGE                                                                     
@@ -109,7 +107,7 @@
         real(r8), pointer :: BWDXL_veg(:,:,:)
         real(r8), pointer :: BWDYL_veg(:,:,:)
 # endif 
-# ifdef MARSH_WAVE_DYNAMICS
+# ifdef MARSH_DYNAMICS
         real(r8), pointer :: marsh_mask(:,:)
 #  ifdef MARSH_WAVE_THRUST
         real(r8), pointer :: umask_marsh(:,:)
@@ -122,10 +120,7 @@
         real(r8), pointer :: marsh_flux_out(:,:,:)
 #  endif 
 #  if defined MARSH_RETREAT 
-        real(r8), pointer :: dx_xi_retreat(:,:)
-        real(r8), pointer :: dy_eta_retreat(:,:)
         real(r8), pointer :: marsh_retreat(:,:)
-        real(r8), pointer :: marsh_scrp_hght(:,:)
 #  endif 
 #  if defined MARSH_STOCH
         real(r8), pointer :: marsh_stoch(:,:)
@@ -209,7 +204,7 @@
       allocate ( VEG(ng) % BWDXL_veg(LBi:UBi,LBj:UBj,N(ng)) )
       allocate ( VEG(ng) % BWDYL_veg(LBi:UBi,LBj:UBj,N(ng)) )
 # endif
-# ifdef MARSH_WAVE_DYNAMICS
+# ifdef MARSH_DYNAMICS
       allocate ( VEG(ng) % marsh_mask(LBi:UBi,LBj:UBj        ) )
 #  ifdef MARSH_WAVE_THRUST
       allocate ( VEG(ng) % umask_marsh(LBi:UBi,LBj:UBj        ) )
@@ -222,10 +217,7 @@
       allocate ( VEG(ng) % marsh_flux_out(LBi:UBi,LBj:UBj,NST) )
 #  endif
 #  if defined MARSH_RETREAT
-      allocate ( VEG(ng) % dx_xi_retreat(LBi:UBi,LBj:UBj ) )
-      allocate ( VEG(ng) % dy_eta_retreat(LBi:UBi,LBj:UBj ) )
       allocate ( VEG(ng) % marsh_retreat(LBi:UBi,LBj:UBj ) )
-      allocate ( VEG(ng) % marsh_scrp_hght(LBi:UBi,LBj:UBj ) )
 #  endif
 #  if defined MARSH_STOCH
       allocate ( VEG(ng) % marsh_stoch(LBi:UBi,LBj:UBj ) )
@@ -405,7 +397,7 @@
 #  endif
 # endif
 !
-# ifdef MARSH_WAVE_DYNAMICS
+# ifdef MARSH_DYNAMICS
         DO j=Jmin,Jmax
           DO i=Imin,Imax
             VEG(ng) % marsh_mask(i,j)    = IniVal
@@ -431,10 +423,7 @@
 #  if defined MARSH_RETREAT
         DO j=Jmin,Jmax
           DO i=Imin,Imax
-            VEG(ng) % dx_xi_retreat(i,j)  = IniVal
-            VEG(ng) % dy_eta_retreat(i,j) = IniVal
             VEG(ng) % marsh_retreat(i,j)  = IniVal
-            VEG(ng) % marsh_scrp_hght(i,j)  = IniVal
           END DO 
         END DO
 #  endif

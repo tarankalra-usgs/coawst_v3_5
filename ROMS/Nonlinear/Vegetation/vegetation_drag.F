@@ -62,7 +62,7 @@
 # ifdef VEG_FLEX
      &                        VEG(ng) % bend,                           &
 # endif
-# if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT
+# if defined MARSH_DYNAMICS && defined MARSH_RETREAT
      &                        VEG(ng) % marsh_mask,                     &
 # endif
      &                        VEG(ng) % ru_loc_veg,                     &
@@ -90,7 +90,7 @@
 # ifdef VEG_FLEX
      &                              bend,                               &
 # endif
-# if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT
+# if defined MARSH_DYNAMICS && defined MARSH_RETREAT
      &                              marsh_mask,                         &
 # endif
      &                              ru_loc_veg, rv_loc_veg,             &
@@ -126,7 +126,7 @@
 #  ifdef VEG_FLEX
       real(r8), intent(inout) :: bend(LBi:,LBj:,:)
 #  endif
-# if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT
+# if defined MARSH_DYNAMICS && defined MARSH_RETREAT
       real(r8), intent(inout) :: marsh_mask(LBi:,LBj:)
 # endif
       real(r8), intent(inout) :: ru_loc_veg(LBi:,LBj:,:,:)
@@ -144,7 +144,7 @@
 #  ifdef VEG_FLEX
       real(r8), intent(inout) :: bend(LBi:UBi,LBj:UBj,N(ng),NVEG)
 #  endif
-# if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT 
+# if defined MARSH_DYNAMICS && defined MARSH_RETREAT 
       real(r8), intent(inout) :: marsh_mask(LBi:UBi,LBj:UBj)
 # endif
       real(r8), intent(inout) ::                                        &
@@ -192,7 +192,7 @@
 # endif
 
 !
-# if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT 
+# if defined MARSH_DYNAMICS && defined MARSH_RETREAT 
       DO ivpr=1,NVEGP
         DO iveg=1,NVEG
           DO j=Jstr,Jend
@@ -372,7 +372,7 @@
      &                          rv_veg(:,:,:))
       END IF
 !
-#  if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT 
+#  if defined MARSH_DYNAMICS && defined MARSH_RETREAT 
       DO ivpr=1,NVEGP
         CALL bc_r3d_tile (ng, tile,                                     &
      &                          LBi, UBi, LBj, UBj, 1, NVEG,            &
@@ -395,7 +395,7 @@
      &                    EWperiodic(ng), NSperiodic(ng),               &
      &                    ru_veg, rv_veg)
 ! 
-#  if defined MARSH_WAVE_DYNAMICS && defined MARSH_RETREAT 
+#  if defined MARSH_DYNAMICS && defined MARSH_RETREAT 
       CALL mp_exchange4d (ng, tile, iNLM, 1,                            &
      &                    LBi, UBi, LBj, UBj, 1, NVEG, 1, NVEGP,        &
      &                    NghostPoints,                                 &

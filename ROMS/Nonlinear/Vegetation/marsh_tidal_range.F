@@ -84,17 +84,11 @@
       USE mod_ocean 
       USE mod_scalars
       USE mod_vegetation
-!      USE mod_vegarr
       USE bc_2d_mod, ONLY : bc_r2d_tile
       USE bc_3d_mod, ONLY : bc_r3d_tile
-!      USE exchange_2d_mod
 # ifdef DISTRIBUTE
       USE mp_exchange_mod, ONLY : mp_exchange2d, mp_exchange3d
 # endif
-!
-!#ifdef DISTRIBUTE
-!      USE mp_exchange_mod, ONLY : mp_exchange2d
-!#endif
 !
 !  Imported variable declarations.
 !
@@ -129,48 +123,40 @@
 !  Local variable declarations.
 !
       integer  :: i, j, it, iic_loc
-      integer  :: init=1
       integer  :: counter_new_time, counter_loc
       integer  :: freq 
-      real(r8) :: ntimes_marsh_rl!, counter_loc_rl
+      real(r8) :: ntimes_marsh_rl
       real(r8) :: zeta_loc, zeta_max2, zeta_min, tdays_marsh
       real(r8) :: tot_zeta_max, tot_zeta_min
       real(r8) :: mean_zeta_max, mean_zeta_min
       real(r8) :: time_loc
       real(r8) :: modm_freq, day2sec_loc, day_inp_loc, tdays_loc
-!      real(r8) :: zeta_max_rec_inp, zeta_min_rec_inp
-!      real(r8) :: zeta_max1(iminS:imaxS, jminS:jmaxS) 
+!
 # include "set_bounds.h"
 !
 !----------------------------------------------------------------------
 !  Executing the code
 !----------------------------------------------------------------------
 ! 
-       day2sec_loc=86400.0_r8 !! 86400.0_r8 
-       day_inp_loc=1.0_r8               ! record zeta max, min per day 
-       
-!       zeta_max_rec_inp= 0.05_r8
-!       zeta_min_rec_inp=-0.05_r8
-
+       day2sec_loc=86400.0_r8 ! 86400.0_r8 
+       day_inp_loc=1.0_r8     ! record zeta max, min per day 
+!       
        time_loc=dt(ng)*iic(ng)                            ! ocean time 
        tdays_loc=MAX((FLOOR(time_loc/(day_inp_loc*day2sec_loc))),1)! time in days 
        freq=CEILING(day_inp_loc*day2sec_loc/dt(ng))        ! time step freq. to record zeta max,min
 
        modm_freq=MOD(iic(ng),freq)
-
 !
        DO j=Jstr,Jend
         DO i=Istr,Iend
          
           zeta_loc=zeta(i,j,3)     ! store zeta locally first
-!          ntimes_marsh_rl=INT(counter_loc)
 !          
           ntimes_marsh_rl=REAL(NTIMES_MARSH)
           zeta_max1(i,j)=MAX(zeta_max1(i,j),zeta_loc)
           zeta_min1(i,j)=MIN(zeta_min1(i,j),zeta_loc)
 !
-! want to retain the value of counter_loc_rl in the next time
-! step 
+! Retain the value of counter_loc_rl in the next time step. 
 !
           IF(modm_freq==0.and.counter_loc_rl<=ntimes_marsh_rl) THEN 
             counter_loc_rl=MOD(tdays_loc,ntimes_marsh_rl)
@@ -178,38 +164,33 @@
               counter_loc_rl=ntimes_marsh_rl
             END IF
 !
-! this has correct value of counter 
+! this has correct value of counter. 
 !
             zeta_max_rec(i,j,INT(counter_loc_rl))=(zeta_max1(i,j))
             zeta_min_rec(i,j,INT(counter_loc_rl))=(zeta_min1(i,j))
 !
 ! Once get zeta_max_rec for a day, then reinitialize zeta_max1 
-! for the next cycle of saving values
+! for the next cycle of saving values.
 !
             zeta_max1(i,j)=-10.0_r8
             zeta_min1(i,j)= 10.0_r8
          END IF
           
 !          
-! Find the mean for the tidal range
-! Could be any other statistic 
+! Find the mean for the tidal range.
 !  
           tot_zeta_max=0.0_r8
           tot_zeta_min=0.0_r8 
           DO it=1,NTIMES_MARSH
-!            zeta_max_rec(i,j,it)=MAX(zeta_max_rec(i,j,it),              &
-!     &                               zeta_max_rec_inp   )
-!            zeta_min_rec(i,j,it)=MIN(zeta_min_rec(i,j,it),              &
-!     &                               zeta_min_rec_inp   )
             tot_zeta_max=zeta_max_rec(i,j,it)+tot_zeta_max
             tot_zeta_min=zeta_min_rec(i,j,it)+tot_zeta_min
           END DO 
           mean_zeta_max=tot_zeta_max/NTIMES_MARSH
           mean_zeta_min=tot_zeta_min/NTIMES_MARSH
-!          marsh_tidal_range(i,j)=0.1_r8
+!
           marsh_high_water(i,j)=mean_zeta_max 
           marsh_tidal_range(i,j)=mean_zeta_max-mean_zeta_min 
-          marsh_tidal_range(i,j)=marsh_tidal_range(i,j)*marsh_mask(i,j)
+          marsh_tidal_range(i,j)=marsh_tidal_range(i,j)
 !
         END DO
       END DO

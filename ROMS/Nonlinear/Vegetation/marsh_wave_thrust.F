@@ -1,7 +1,7 @@
 #include "cppdefs.h"
  
        MODULE marsh_wave_thrust_mod
-#if defined MARSH_WAVE_DYNAMICS && defined MARSH_WAVE_THRUST 
+#if defined MARSH_DYNAMICS && defined MARSH_WAVE_THRUST 
 !
 !svn $Id: marsh_wave_thrust.F 429 2019-04-20 17:30:26Z arango $
 !======================================================================!
@@ -301,8 +301,6 @@
 !  Total wave thrust at mean sea level.
 !---------------------------------------------------------------------
 !
-! used an absolute to avoid integral kp thing from changing sign of FX,FY
-!
           F_msl=F_asl+F_bsl
           FX(i,j)=F_msl*cos(cff)
           FY(i,j)=F_msl*sin(cff)
@@ -321,25 +319,28 @@
           cff2=half*(1.0_r8+cff1)
           cff3=half*(1.0_r8-cff1)
 !
-          cff6=SIGN(1.0_r8,FX(i,j))
-          cff8=half*(1.0_r8-cff6)
+          cff4=SIGN(1.0_r8,FX(i,j))
+          cff5=half*(1.0_r8-cff4)
 !
-          cff5=SIGN(1.0_r8,FX(i-1,j))
-          cff7=half*(1.0_r8+cff5)
+          cff6=SIGN(1.0_r8,FX(i-1,j))
+          cff7=half*(1.0_r8+cff6)
 !
           Thrust_xi(i,j)=ABS(umask_marsh(i,j))*                         &
-     &                      (cff2*cff8*FX(i,j)+cff3*cff7*FX(i-1,j))
+     &                      (cff2*cff5*FX(i,j)+cff3*cff7*FX(i-1,j))
+!
+! Account for marsh cell depth by exponentially decreasing 
+! thrust if marsh is fully submerged. Otherwise, constant thrust.
 !
           depth_all=cff2*(h(i-1,j  )+zeta(i,j,1)  )+                    &
      &              cff3*(h(i,j    )+zeta(i-1,j,1))
           IF(depth_all.lt.0.0_r8) THEN
-            cff4=1.0_r8
+            cff8=1.0_r8
           ELSEIF(depth_all.ge.0.0_r8) THEN
-            cff4=exp(-depth_all*3.0_r8)
+            cff8=exp(-depth_all*3.0_r8)
           ENDIF
 !
 !---------------------------------------------------------------------
-! Modify xi cell face thrust based on water depth
+! Modify xi cell face thrust based on water depth.
 !---------------------------------------------------------------------
 !
           Thrust_xi(i,j)=cff4*Thrust_xi(i,j)
@@ -354,26 +355,29 @@
           cff2=half*(1.0_r8+cff1)
           cff3=half*(1.0_r8-cff1)
 !
-          cff6=SIGN(1.0_r8,FY(i,j))
-          cff8=half*(1.0_r8-cff6)
+          cff4=SIGN(1.0_r8,FY(i,j))
+          cff5=half*(1.0_r8-cff4)
 !
-          cff5=SIGN(1.0_r8,FY(i,j-1))
-          cff7=half*(1.0_r8+cff5)
+          cff6=SIGN(1.0_r8,FY(i,j-1))
+          cff7=half*(1.0_r8+cff6)
 !
           Thrust_eta(i,j)=ABS(vmask_marsh(i,j))*                        &
-     &                       (cff3*cff7*FY(i,j-1)+cff2*cff8*FY(i,j))
+     &                       (cff3*cff7*FY(i,j-1)+cff2*cff5*FY(i,j))
+!
+! Account for marsh cell depth by exponentially decreasing 
+! thrust if marsh is fully submerged. Otherwise, constant thrust.
 !
           depth_all=cff2*(h(i,j-1)+zeta(i,j,1  ))+                      &
      &              cff3*(h(i,j  )+zeta(i,j-1,1))
 !
           IF(depth_all.lt.0.0_r8) THEN
-            cff4=1.0_r8
+            cff8=1.0_r8
           ELSEIF(depth_all.ge.0.0_r8) THEN
-            cff4=exp(-depth_all*3.0_r8)
+            cff8=exp(-depth_all*3.0_r8)
           ENDIF
 !
 !---------------------------------------------------------------------
-! Modify eta cell face thrust based on water depth
+! Modify eta cell face thrust based on water depth.
 !---------------------------------------------------------------------
 !
           Thrust_eta(i,j)=cff4*Thrust_eta(i,j)

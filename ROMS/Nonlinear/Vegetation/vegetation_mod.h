@@ -96,7 +96,7 @@
       integer, allocatable :: idvprp(:)
 #endif
 !    
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
       integer ::  idTims
 # if defined MARSH_WAVE_THRUST 
       integer ::  idTtot
@@ -106,7 +106,6 @@
 # endif 
 # if defined MARSH_RETREAT
       integer ::  idTmmr
-      integer ::  idTmsc
 # endif 
 # if defined MARSH_TIDAL_RANGE
       integer ::  NTIMES_MARSH
@@ -125,7 +124,7 @@
       real(r8), allocatable :: VEGHMIXCOEF(:,:)
 #endif
 ! 
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
 # if defined MARSH_SED_EROSION
       real(r8), allocatable :: KFAC_MARSH(:)
 #  if defined MARSH_RETREAT
@@ -180,7 +179,7 @@
          allocate ( idvprp(NVEGP) )
        END IF
 #endif 
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
 # if defined MARSH_SED_EROSION 
        IF (.not.allocated(idTmfo)) THEN
          allocate ( idTmfo(NST) )

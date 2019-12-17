@@ -65,7 +65,7 @@
         END IF
 # endif
 ! 
-# ifdef MARSH_WAVE_DYNAMICS
+# ifdef MARSH_DYNAMICS
 #  ifdef MARSH_WAVE_THRUST
 !
 !  Store marsh masking from marsh cells. 

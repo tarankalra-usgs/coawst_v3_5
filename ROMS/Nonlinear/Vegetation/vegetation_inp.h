@@ -270,7 +270,7 @@
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idWdvg,:))
 #endif
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
             CASE ('Hout(idTims)')
               IF (idTims.eq.0) THEN
                 IF (Master) WRITE (out,30) 'idTims'
@@ -312,13 +312,6 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmmr,:))
-            CASE ('Hout(idTmsc)')
-              IF (idTmsc.eq.0) THEN 
-                IF (Master) WRITE (out,30) 'idTmsc'
-                exit_flag=5
-                RETURN
-              END IF
-              Npts=load_l(Nval, Cval, Ngrids, Hout(idTmsc,:))
 #   endif 
 #  endif 
 # endif 
@@ -378,7 +371,7 @@
      &                       VEG_MASSDENS(iveg,ng), VEGHMIXCOEF(iveg,ng)
             END DO 
 #endif 
-#if defined MARSH_WAVE_DYNAMICS
+#if defined MARSH_DYNAMICS
            WRITE (out,80)  ng
 # if defined MARSH_SED_EROSION  
            WRITE (out,90)  KFAC_MARSH(ng)
@@ -423,7 +416,7 @@
       &        'E_veg(N/m2)',2x,'Veg_massdens(kg/m3)',2x,'VegHMixCoef'/)
    70  FORMAT (2x,i2,2(10x,1p,e11.4),2(5x,1p,e11.4))
 #endif
-#ifdef MARSH_WAVE_DYNAMICS
+#ifdef MARSH_DYNAMICS
    80  FORMAT (/,/,' Marsh dynamics model Parameters, Grid: ',i2.2,     &
       &        /,  ' =====================================',/)
 # if defined MARSH_SED_EROSION

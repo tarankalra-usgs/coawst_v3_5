@@ -39,7 +39,7 @@
               idWdvg=varid
 #endif 
 ! 
-#if defined MARSH_WAVE_DYNAMICS
+#if defined MARSH_DYNAMICS
             CASE ('idTims')
               idTims=varid
 # if defined MARSH_WAVE_THRUST
@@ -76,8 +76,6 @@
 # if defined MARSH_RETREAT
             CASE ('idTmmr')
               idTmmr=varid
-            CASE ('idTmsc')
-              idTmsc=varid
 # endif 
 # if defined MARSH_TIDAL_RANGE
 	    CASE('idTmtr')
@@ -89,6 +87,6 @@
 	      idTmbp=varid 
 	    CASE('idTmvg')
 	      idTmvg=varid 
-#  endif !  end of marsh vertical growth  	      
-# endif  ! end of marsh tidal range 
+#  endif   	      
+# endif  
 #endif   

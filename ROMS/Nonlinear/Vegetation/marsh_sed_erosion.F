@@ -2,7 +2,7 @@
 
       MODULE marsh_sed_erosion_mod
 !
-#if defined SEDIMENT  && defined MARSH_WAVE_DYNAMICS \
+#if defined SEDIMENT  && defined MARSH_DYNAMICS \
         && defined MARSH_SED_EROSION  
 !
 !svn $Id: marsh_sed_erosion.F 429 2019-04-20 17:30:26Z arango $
@@ -76,10 +76,7 @@
      &                       VEG(ng) % marsh_mask,                      &
      &                       VEG(ng) % marsh_flux_out,                  &
 # ifdef MARSH_RETREAT
-     &                       VEG(ng) % dx_xi_retreat,                   &
-     &                       VEG(ng) % dy_eta_retreat,                  &
      &                       VEG(ng) % marsh_retreat,                   &
-!     &                       VEG(ng) % marsh_scrp_hght,                 &
 # endif
 # ifdef MARSH_STOCH
      &                       VEG(ng) % marsh_stoch,                     &
@@ -108,12 +105,7 @@
      &                             Thrust_total,                        &
      &                             marsh_mask, marsh_flux_out,          &
 # ifdef MARSH_RETREAT
-     &                             dx_xi_retreat,                       &
-     &                             dy_eta_retreat,                      &
-!     &                             mass_change_xi,                      &
-!     &                             mass_change_eta,                     &
      &                             marsh_retreat,                       &
-!     &                             marsh_scrp_hght,                     &
 # endif
 # ifdef MARSH_STOCH
      &                             marsh_stoch,                         &
@@ -163,10 +155,7 @@
       real(r8), intent(inout) :: marsh_mask(LBi:,LBj:)
       real(r8), intent(inout) :: marsh_flux_out(LBi:,LBj:,:)
 # ifdef MARSH_RETREAT
-      real(r8), intent(inout) :: dx_xi_retreat(LBi:,LBj:)
-      real(r8), intent(inout) :: dy_eta_retreat(LBi:,LBj:)
       real(r8), intent(inout) :: marsh_retreat(LBi:,LBj:)
-!      real(r8), intent(inout) :: marsh_scrp_hght(LBi:,LBj:)
 # endif
 # ifdef MARSH_STOCH
       real(r8), intent(in) :: marsh_stoch(LBi:,LBj:)
@@ -195,12 +184,7 @@
       real(r8), intent(inout) :: marsh_mask(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: marsh_flux_out(LBi:UBi,LBj:UBj,NST)
 # ifdef MARSH_RETREAT
-      real(r8), intent(inout) :: dx_xi_retreat(LBi:UBi,LBj:UBj)
-      real(r8), intent(inout) :: dy_eta_retreat(LBi:UBi,LBj:UBj)
-!      real(r8), intent(inout) :: mass_change_xi(LBi:UBi,LBj:UBj)
-!      real(r8), intent(inout) :: mass_change_eta(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: marsh_retreat(LBi:UBi,LBj:UBj)
-!      real(r8), intent(inout) :: marsh_scrp_hght(LBi:UBi,LBj:UBj)
 # endif
 # ifdef MARSH_STOCH
       real(r8), intent(in) :: marsh_stoch(LBi:UBi,LBj:UBj)
@@ -219,16 +203,17 @@
       real(r8), parameter :: eps = 1.0E-14_r8 !
       real(r8), parameter :: kN_N=1000.0_r8 ! convert Thrust from kN to N 
       real(r8) :: cff, cff1, cff2, cff3, cff4, cff5, cff_retreat 
-      real(r8) :: bed_thick_old, bathy, cff3_ceil
-!
+      real(r8) :: bed_thick_old, bathy
 # if defined MARSH_RETREAT 
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: mass_change_xi
-      real(r8), dimension(IminS:ImaxS,JminS:JmaxS) :: mass_change_eta
+      real(r8) :: cff3_ceil
 # endif
 !
 # include "set_bounds.h"
 !
+# if defined MARSH_RETREAT 
       cff3_ceil=0.0_r8
+# endif
+!
       J_LOOP: DO j=Jstr,Jend
         DO i=Istr,Iend
           SED_LOOP: DO ised=1,NST
@@ -257,7 +242,6 @@
      &                                         on_u(i+1,j  )*cff3       &
      &                 -Thrust_xi(i,j)*bed_frac(i-1,j,1,ised)*          &
      &                                         on_u(i,j)*cff2     )     
-!
             cff=cff+cff4
 ! 
 !---------------------------------------------------------------------
@@ -277,10 +261,6 @@
 !---------------------------------------------------------------------
 !
             cff=MAX(cff,0.0_r8)
-!
-# if defined MARSH_RETREAT 
-            mass_change_xi(i,j)=cff4!+mass_change_xi(i,j)
-# endif 
 !
 !---------------------------------------------------------------------
 ! Sediment flux for each sediment class out of marsh cells
@@ -313,10 +293,6 @@
      &                 -Thrust_eta(i,j+1)*om_v(i,j+1)*cff3        )
             cff=cff-cff4
 !
-# if defined MARSH_RETREAT 
-            mass_change_eta(i,j)=cff4!+mass_change_eta(i,j)
-# endif 
-!
 !---------------------------------------------------------------------
 ! Ensure that cff is not negative 
 !---------------------------------------------------------------------
@@ -343,9 +319,7 @@
 ! recalculate thickness and fractions for all layers.
 !---------------------------------------------------------------------
 !
-# if defined MARSH_RETREAT
           cff3_ceil=MAX(CEILING(Thrust_total(i,j)),0)
-# endif
 !
           bed_thick_old=bed(i,j,1,ithck)
           cff3=0.0_r8
@@ -437,20 +411,12 @@
       CALL bc_r2d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj,                             &
      &                  marsh_retreat)
-!      CALL bc_r2d_tile (ng, tile,                                       &
-!     &                  LBi, UBi, LBj, UBj,                             &
-!     &                  marsh_scrp_hght)
 #  ifdef DISTRIBUTE
       CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        NghostPoints,                             &
      &                        EWperiodic(ng), NSperiodic(ng),           &
      &                        marsh_retreat)
-!      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
-!     &                        LBi, UBi, LBj, UBj,                       &
-!     &                        NghostPoints,                             &
-!     &                        EWperiodic(ng), NSperiodic(ng),           &
-!     &                        marsh_scrp_hght)
 #  endif
 # endif 
 !
