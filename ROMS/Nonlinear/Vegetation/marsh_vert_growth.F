@@ -15,8 +15,10 @@
 !==============================================Alfredo Aretxabaleta====!
 !==============================================John C. Warner==========!
 !                                                                      !
-!  Calculate vertical growth of marsh through biomass production       !
-!  and calculate marsh vegetation growth.                              ! 
+!  Calculate vertical growth of marsh through biomass production.      !
+!  Biomass production can lead to mudflats being converted to marsh    !
+!  cells and evolve marsh stem/canopy properties                       ! 
+!                                                                      !
 !  References:                                                         !
 !                                                                      !
 !======================================================================!
@@ -49,7 +51,8 @@
       USE mod_grid
       USE mod_ocean
       USE mod_vegarr
-!      USE mod_sedbed
+      USE mod_sedbed
+      USE mod_stepping
 
       integer, intent(in) :: ng, tile
 
@@ -62,7 +65,9 @@
      &                       IminS, ImaxS, JminS, JmaxS,                &
      &                       GRID(ng) % h,                              &
      &                       OCEAN(ng)  % zeta,                         &
-!     &                       SEDBED(ng) % bed,                          &
+     &                       nnew(ng),                                  &
+     &                       SEDBED(ng) % bed,                          &
+     &                       SEDBED(ng) % bed_mass,                     &
      &                       VEG(ng) % marsh_mask,                      &
      &                       VEG(ng) % marsh_high_water,                &
      &                       VEG(ng) % marsh_tidal_range,               &
@@ -80,7 +85,9 @@
      &                             IminS, ImaxS, JminS, JmaxS,          &
      &                             h,                                   &
      &                             zeta,                                &
-!     &                             bed,                                 &
+     &                             nnew,                                &
+     &                             bed,                                 &
+     &                             bed_mass,                            &
      &                             marsh_mask,                          &
      &                             marsh_high_water,                    &
      &                             marsh_tidal_range,                   &
@@ -97,7 +104,7 @@
       USE mod_scalars
       USE mod_vegetation
       USE mod_vegarr
-!      USE mod_sediment
+      USE mod_sediment
       USE bc_2d_mod, ONLY : bc_r2d_tile
       USE bc_3d_mod, ONLY : bc_r3d_tile
 !      USE exchange_2d_mod
@@ -111,12 +118,14 @@
       integer, intent(in) :: ng, tile
       integer, intent(in) :: LBi, UBi, LBj, UBj
       integer, intent(in) :: IminS, ImaxS, JminS, JmaxS
+      integer, intent(in) :: nnew
 !
 # ifdef ASSUMED_SHAPE
-!      real(r8), intent(in)    :: bed(LBi:,LBj:,:,:)
-      real(r8), intent(in)    :: marsh_mask(LBi:,LBj:)
+      real(r8), intent(inout) :: marsh_mask(LBi:,LBj:)
       real(r8), intent(inout) :: h(LBi:,LBj:)
       real(r8), intent(in)    :: zeta(LBi:,LBj:,:)
+      real(r8), intent(in)    :: bed(LBi:,LBj:,:,:)
+      real(r8), intent(inout) :: bed_mass(LBi:,LBj:,:,:,:)
       real(r8), intent(in)    :: marsh_high_water(LBi:,LBj:)
       real(r8), intent(in)    :: marsh_tidal_range(LBi:,LBj:)
 #  if defined MARSH_BIOMASS_VEG
@@ -125,10 +134,11 @@
       real(r8), intent(inout) :: marsh_biomass_peak(LBi:,LBj:)
       real(r8), intent(inout) :: marsh_vert(LBi:,LBj:)
 # else
-!      real(r8), intent(in)    :: bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
-      real(r8), intent(in)    :: marsh_mask(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: marsh_mask(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: h(LBi:UBi,LBj:UBj)
       real(r8), intent(in)    :: zeta(LBi:UBi,LBj:UBj,3)
+      real(r8), intent(in)    :: bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
+      real(r8), intent(inout) :: bed_mass(LBi:UBi,LBj:UBj,Nbed,1:2,NST)
       real(r8), intent(in)    :: marsh_high_water(LBi:UBi,LBj:UBj)
       real(r8), intent(in)    :: marsh_tidal_range(LBi:UBi,LBj:UBj)
 #  if defined MARSH_BIOMASS_VEG
@@ -144,7 +154,8 @@
       real(r8) :: Dmin, Dmax, depth
       real(r8) :: Bpeak, Rref, AMC
       real(r8) :: ramp, cff 
-      real(r8), parameter :: lower_lev=1.0e-9 ! 800-1000 kg/m3 
+      real(r8) :: marsh_bulk_density
+!      real(r8), parameter :: lower_lev=1.0e-9 ! 800-1000 kg/m3 
       real(r8), parameter ::                                            &
      &                  one_over_year2sec=1.0_r8/(365.0_r8*86400.0_r8)
 !
@@ -160,7 +171,6 @@
         DO i=Istr,Iend
 !
           Dmin=marsh_high_water(i,j)
-!          Dmax=-0.7372_r8*2.0_r8*Dmin+0.092_r8+Dmin
           Dmax=Par_fac1(ng)*2.0_r8*Dmin+Par_fac2(ng)+Dmin
 !
           depth=ABS(h(i,j))
@@ -175,9 +185,7 @@
 ! 
             Bpeak=BMax(ng)*(Depth-Dmax)*(Depth-Dmin)/cff
 !
-            IF (Bpeak.lt.lower_lev) THEN
-              Bpeak=0.0_r8
-            ENDIF
+            Bpeak=MAX(Bpeak,0.0_r8) 
 !
 ! Amount of below ground biomass. 
 !
@@ -192,23 +200,29 @@
 !       
 ! Masking the amount of marsh biomass and saving in 2D array for I/O.
 ! 
-          marsh_biomass_peak(i,j)=Bpeak*marsh_mask(i,j)
+          marsh_biomass_peak(i,j)=Bpeak*marsh_mask(i,j)*ramp
 !
-! what material remains after accounting for recalitrant Carbon.
+! what material remains after accounting for recalcitrant Carbon.
 !
-          Rref=AMC*chiref(ng)
+          Rref=AMC*chiref(ng)*ramp 
 !
-! vertical accretion in m. 
-!
-          marsh_vert(i,j)=(Rref/marsh_bulk_dens(ng))*ramp*dt(ng)*       &
-     &                          marsh_mask(i,j)      
+! Assuming that organic sed in class 1, add bed mass. 
 ! 
-#  ifdef MARSH_BIOMASS_MORPH
-          h(i,j)=h(i,j)-marsh_vert(i,j)
-#  endif
+          bed_mass(i,j,1,nnew,1)=bed_mass(i,j,1,nnew,1)+Rref 
+!
+! Vertical accretion in m. 
+!
+          marsh_bulk_density=Srho(1,ng)*bed(i,j,1,iporo)
+          marsh_vert(i,j)=(Rref/marsh_bulk_density)*dt(ng)*             &
+     &                                     marsh_mask(i,j)      
 ! 
 #  if defined MARSH_BIOMASS_VEG
           IF(tdays(ng).gt.NTIMES_MARSH) THEN
+!
+! Colonize if marsh biomass production (Bpeak)>0.0
+!
+            marsh_mask(i,j)=MIN(1.0_r8,MAX(Bpeak,0.0_r8))
+!
             DO iveg=1,NVEG
 ! 
 ! Inside veg loop to change veg properties based on Bpeak
@@ -237,7 +251,25 @@
 !
 ! Exchange boundary data 
 !
+      DO ised=1,NST
+        CALL bc_r3d_tile (ng, tile,                                     &
+     &                    LBi, UBi, LBj, UBj, 1, Nbed,                  &
+     &                    bed_mass(:,:,:,nnew,ised))
+      END DO 
+!
+      CALL bc_r2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  marsh_biomass_peak)
+!
+      CALL bc_r2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  marsh_vert)
+!
 #  if defined MARSH_BIOMASS_VEG
+      CALL bc_r2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  marsh_mask)
+!
       DO ivpr=1,NVEGP
         CALL bc_r3d_tile (ng, tile,                                     &
      &                    LBi, UBi, LBj, UBj, 1, NVEG,                  &
@@ -245,28 +277,33 @@
       END DO
 #  endif 
 !
-      CALL bc_r2d_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj,                             &
-     &                  marsh_biomass_peak)
-      CALL bc_r2d_tile (ng, tile,                                       &
-     &                  LBi, UBi, LBj, UBj,                             &
-     &                  marsh_vert)
-!
 # ifdef DISTRIBUTE
 !
-#  if defined MARSH_BIOMASS_VEG
       CALL mp_exchange4d (ng, tile, iNLM, 1,                            &
-     &                    LBi, UBi, LBj, UBj, 1, NVEG, 1, NVEGP,        &
+     &                    LBi, UBi, LBj, UBj, 1, Nbed, 1, NST,          &
      &                    NghostPoints,                                 &
      &                    EWperiodic(ng), NSperiodic(ng),               &
-     &                    plant(:,:,:,:))         
-#  endif
+     &                    bed_mass(:,:,:,nnew,:))
 !
       CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        NghostPoints,                             &
      &                        EWperiodic(ng), NSperiodic(ng),           &
      &                        marsh_biomass_peak, marsh_vert)
+!
+#  if defined MARSH_BIOMASS_VEG
+      CALL mp_exchange2d (ng, tile, iNLM, 1,                            &
+     &                        LBi, UBi, LBj, UBj,                       &
+     &                        NghostPoints,                             &
+     &                        EWperiodic(ng), NSperiodic(ng),           &
+     &                        marsh_mask)
+!
+      CALL mp_exchange4d (ng, tile, iNLM, 1,                            &
+     &                    LBi, UBi, LBj, UBj, 1, NVEG, 1, NVEGP,        &
+     &                    NghostPoints,                                 &
+     &                    EWperiodic(ng), NSperiodic(ng),               &
+     &                    plant(:,:,:,:))         
+#  endif
 # endif
 !
 
