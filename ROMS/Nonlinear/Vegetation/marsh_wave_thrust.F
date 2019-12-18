@@ -343,7 +343,7 @@
 ! Modify xi cell face thrust based on water depth.
 !---------------------------------------------------------------------
 !
-          Thrust_xi(i,j)=cff4*Thrust_xi(i,j)
+          Thrust_xi(i,j)=cff8*Thrust_xi(i,j)
 !
         END DO
       END DO
@@ -380,7 +380,7 @@
 ! Modify eta cell face thrust based on water depth.
 !---------------------------------------------------------------------
 !
-          Thrust_eta(i,j)=cff4*Thrust_eta(i,j)
+          Thrust_eta(i,j)=cff8*Thrust_eta(i,j)
         END DO
       END DO
 !
