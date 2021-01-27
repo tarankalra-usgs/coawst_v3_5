@@ -155,6 +155,8 @@
       real(r8) :: Bpeak, Rref, AMC
       real(r8) :: ramp, cff 
       real(r8) :: marsh_bulk_density
+      real(r8) :: marsh_vert_rate, marsh_vert_rate_insec
+      real(r8) :: slope_in_meter,  marsh_organic_matter
 !      real(r8), parameter :: lower_lev=1.0e-9 ! 800-1000 kg/m3 
       real(r8), parameter ::                                            &
      &                  one_over_year2sec=1.0_r8/(365.0_r8*86400.0_r8)
@@ -164,18 +166,20 @@
 #  endif 
 !
 # include "set_bounds.h"
-!          
-      ramp=MIN(tdays(ng)/NTIMES_MARSH,1.0_r8)
+!      
+!  ramp could be used to introduce vegetation in the flow. 
+!     
+      ramp=MIN( DBLE(FLOOR(tdays(ng)/NTIMES_MARSH)),  1.0_r8 )
 !
       J_LOOP: DO j=Jstr,Jend
         DO i=Istr,Iend
 !
-          Dmin=marsh_high_water(i,j)
-          Dmax=Par_fac1(ng)*2.0_r8*Dmin+Par_fac2(ng)+Dmin
-!
-          depth=ABS(h(i,j))
-!
           IF(tdays(ng).lt.tdays_marsh_growth) THEN 
+!                  
+            Dmin=marsh_high_water(i,j)
+            Dmax=Par_fac1(ng)*2.0_r8*Dmin+Par_fac2(ng)+Dmin
+!
+            Depth=ABS(h(i,j))
 !
 ! scales parabola from 0 to 1 in next line.
 !
@@ -185,11 +189,14 @@
 ! 
             Bpeak=BMax(ng)*(Depth-Dmax)*(Depth-Dmin)/cff
 !
-            Bpeak=MAX(Bpeak,0.0_r8) 
+! Not allow negative Bpeak. 
+!
+            Bpeak=MAX(Bpeak,0.0_r8)*marsh_mask(i,j)
 !
 ! Amount of below ground biomass. 
+!  kg/(sq.m-year) 
 !
-            AMC=tdays(ng)*Bpeak*nuGp(ng)*one_over_year2sec
+            AMC=Bpeak*nuGp(ng)
           ELSE
 ! 
 ! 180 growing days, after 180 days make AMC=0, Bpeak=0.0.
@@ -199,22 +206,36 @@
           ENDIF
 !       
 ! Masking the amount of marsh biomass and saving in 2D array for I/O.
-! 
-          marsh_biomass_peak(i,j)=Bpeak*marsh_mask(i,j)*ramp
+! (kg/(sq.m-year)
+!          
+          marsh_biomass_peak(i,j)=Bpeak
 !
 ! what material remains after accounting for recalcitrant Carbon.
+!  kg/(sq.m-year)
+!          
+          Rref=AMC*chiref(ng)
 !
-          Rref=AMC*chiref(ng)*ramp 
+!  marsh_vert_rate is kg/(sq.m-year)/(kg/m^3) = m/year
+!    (0.9 is the porosity! )
 !
-! Assuming that organic sed in class 1, add bed mass. 
+          marsh_bulk_density=Srho(1,ng)*(1.0_r8-bed(i,j,1,iporo))
+          marsh_vert_rate   =(Rref/marsh_bulk_density)
+!
+!  convert m/year to m/s 
 ! 
-          bed_mass(i,j,1,nnew,1)=bed_mass(i,j,1,nnew,1)+Rref 
+          marsh_vert_rate_insec=marsh_vert_rate*one_over_year2sec
+! 
+! convert the rate to m of accretion 
 !
-! Vertical accretion in m. 
+          slope_in_meter =marsh_vert_rate_insec*dt(ng) 
+          marsh_vert(i,j)=marsh_vert(i,j)+slope_in_meter
+!          
+! Assuming that organic sed in class 1, add bed mass. 
+! marsh_bulk_density = kg/(m^3) (1-poro)*srho. 
 !
-          marsh_bulk_density=Srho(1,ng)*bed(i,j,1,iporo)
-          marsh_vert(i,j)=(Rref/marsh_bulk_density)*dt(ng)*             &
-     &                                     marsh_mask(i,j)      
+          marsh_organic_matter  =slope_in_meter*marsh_bulk_density
+          bed_mass(i,j,1,nnew,1)=bed_mass(i,j,1,nnew,1)+                &
+      &                          marsh_organic_matter
 ! 
 #  if defined MARSH_BIOMASS_VEG
           IF(tdays(ng).gt.NTIMES_MARSH) THEN
