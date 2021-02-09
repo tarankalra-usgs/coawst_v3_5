@@ -28,7 +28,7 @@ marsh_mask=1 ;
 % 
 % 
 % 
-load('matfiles/point12_data_mvt','zeta1','dmin1','mvt1',.....
+load('point12_data_mvt','zeta1','dmin1','mvt1',.....
                         'mbp1','mtr1','h1',........
                         'zeta2','dmin2','mvt2',.....
                         'mbp2','mtr2','h2'); 
@@ -38,12 +38,14 @@ load('matfiles/point12_data_mvt','zeta1','dmin1','mvt1',.....
    dt_indays(iic)=iic*dt*sec2day ;
    BMax=2.500; %# kg/m2
    
-   Dmin=dmin2(iic)     ; % Read in MHW)
+   Dmin=dmin1(iic)     ; % Read in MHW)
    
    Dmax=-0.73*2.0*Dmin+0.092+Dmin; % 
    
-   dmax2(iic)=Dmax     ;
-   Depth=-0.05 ;%zeta1(iic)    ; % you know i wrote my thoughts about our onr work, but nobody talks science together so i kept that as a note.. because like you said John was borderline weird to me that pissed me off .. in order to fill him with neils work , i showed him reedy creek sims and wave thrust. now the waves there are 0.001 mm in height ..  
+   dmax1(iic)=Dmax     ;
+
+   Depth=h1            ; 
+   %Depth=-0.05 ;%zeta1(iic)    ; % you know i wrote my thoughts about our onr work, but nobody talks science together so i kept that as a note.. because like you said John was borderline weird to me that pissed me off .. in order to fill him with neils work , i showed him reedy creek sims and wave thrust. now the waves there are 0.001 mm in height ..ï¿½ 
    
    Depth=abs(Depth); 
    AA=0.25*(Dmin-Dmax)*(Dmax-Dmin)          ; 
@@ -58,10 +60,8 @@ load('matfiles/point12_data_mvt','zeta1','dmin1','mvt1',.....
    if(dt_indays(iic)<180)
 % %   AMC then has units kg/[year m^2 ] % Bpeak is in kg/sq.m and nugp is in
 % %   1/day , *dt_indays = kg/(m^2-year)
-%    AMC(iic)=dt_indays(iic)*Bpeak*(nuGp)/(365*24*3600);  %180 growing days
-%
-%    AMC(iic)=dt_indays(iic)*Bpeak*(nuGp);  %180 growing days
-    AMC(iic)=Bpeak*(nuGp);  %180 growing days
+ % integrated rate for 180 days of growth 
+    AMC(iic)=(180*Bpeak*(nuGp));  %its an yearly rate for 180 days 
 
 %    % only do this for marsh cells 
     AMC(iic)=AMC(iic)*marsh_mask  ;
@@ -91,25 +91,58 @@ load('matfiles/point12_data_mvt','zeta1','dmin1','mvt1',.....
 
 figure(1)
 subplot(4,1,1)
-plot(dt_indays, squeeze(dmin2),'r')
+plot(dt_indays, squeeze(dmin1),'r')
 hold on 
-plot(dt_indays, squeeze(dmax2), 'k')
+plot(dt_indays, squeeze(dmax1), 'k')
 hold on 
-plot(dt_indays, squeeze(Depth).*(dt_indays./dt_indays), 'g')
-legend('dmin','dmax','zeta')
+plot(dt_indays, squeeze(h1).*(dt_indays./dt_indays), 'g')
+legend('dmin','dmax','bathy')
+title('at point1')
 
-subplot(4,1,2)
-plot(dt_indays, squeeze(mtr2))
-xlabel('in days')
-ylabel('tidal range')
+% subplot(4,1,2)
+% plot(dt_indays, squeeze(mtr1))
+% xlabel('in days')
+% ylabel('tidal range')
+% title('at point1')
 
 %figure(2)
-subplot(4,1,3)
+subplot(4,1,2)
 plot(dt_indays, squeeze(marsh_rate_vert)*1000)
 xlabel('in days')
 ylabel('Vertical growth rate in mm/year')
+%title('at point1')
+
+subplot(4,1,3)
+plot(dt_indays, squeeze(marsh_vert_rate_insec)*1000)
+xlabel('in days')
+ylabel('Vertical growth rate in mm/s')
+%title('at point1')
 
 subplot(4,1,4)
 plot(dt_indays,marsh_grow(1:721)*1000) 
 xlabel('in days')
 ylabel('vertical growth in mm')
+%title('at point 1')
+
+set(gcf,'PaperUnits','inches','PaperPosition',[0 0 11 10])
+print('-dpng','-r100','png/figures_pt1_matlabcode.png')
+
+ figure(5)
+ subplot(2,1,1)
+ plot(dt_indays, squeeze(mvt1)*1000)
+ xlabel('in days')
+ ylabel('vertical growth in (mm/s)')
+ title('point 1-from coawst run previously')
+%  hold on  
+
+ subplot(2,1,2)
+ plot(dt_indays, marsh_vert_rate_insec*1000)
+ xlabel('in days')
+ ylabel('vertical growth from new matlab code in mm/s')
+  title('point 1- from new matlab code change')
+
+set(gcf,'PaperUnits','inches','PaperPosition',[0 0 11 10])
+print('-dpng','-r100','png/figures_pt1_matlab_COAWST.png')
+ % plot(dt_indays, squeeze(mo))
+% legend('model prediction','new matlab code')
+% title('at point 1')

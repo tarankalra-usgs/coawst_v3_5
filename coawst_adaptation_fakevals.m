@@ -61,8 +61,9 @@ for iic=1:nlength  ; % length(Dmin)
 % kg/(m2-year)
 % Originally i had dt in days multipleid 
 %   AMC(iic)=dt_indays(iic)*Bpeak*(nuGp);  %180 growing days
-   
-   AMC(iic)=Bpeak*nuGp ; 
+    % integrated rate for 180 days of growth 
+
+   AMC(iic)=180*Bpeak*nuGp ; 
    AMC(iic)=AMC(iic)*marsh_mask  ;
   else
    AMC(iic)=0.0; 

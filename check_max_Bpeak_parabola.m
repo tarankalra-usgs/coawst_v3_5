@@ -4,7 +4,7 @@ clear all ; close all ; clc;
 %RESPONSES OF COASTAL WETLANDS TO RISING SEA LEVEL
 % Morris, J. T., P. V. Sundareshwar, C. T. Nietch, B. Kjerfve, and    !
 %!  D. R. Cahoon.: Responses of coastal wetlands to rising sea level,   !
-%!  Ecology, 83(10), 2869–2877, 2002. 
+%!  Ecology, 83(10), 2869ï¿½2877, 2002. 
 clear all ; close all ; clc ; 
 % iterate through time
 
@@ -46,28 +46,30 @@ for iic=1:length(Dm)
   nuGp=.0138 ; % #below ground  fraction
 % % 
   %if(dt_indays(iic)<180)
-%   AMC=Bpeak*(nuGp)/(365*24*3600);  %180 growing days
-   AMC=Bpeak*nuGp ;
-   % AMC is units of kg/(sq.m-s)
-  %else
-  % AMC=0.0; 
-  %end 
+  
+  % in kg/(sq.m-year) 
+   AMC=180*Bpeak*nuGp ; % Integrated amount of below ground biomass 
+   % in a growing year converted kg/(sq-m year) 
   
   Rref(iic)=AMC*chiref  ;%#what material remains 
   
   % Rref is units of kg/(sq.m-year) po is units of kg/m^3 
-  marsh_vert_rate(iic)=(Rref(iic)/po);%  #vertical accretion rate in m/year
-  
- % O(iic)= O(iic)*dt*1000*365*86400; % accretion every time step in mm . 
+ 
+ % this makes sense should be a max of 3mm / year corresponding to peak
+%  % biomass. 
+  marsh_vert_rate_inyear(iic)=(Rref(iic)/po);%  #vertical accretion rate in m/year
+  marsh_vert_rate_insec(iic)=(Rref(iic)/po)/(365*86400) ;% in m/s
+ %  vertical accretion rate in m/year. 
+%   marsh_vert_rate_inyear(iic)=(Rref(iic)/po)*365*86400
  
   Bpeak_save(iic)=Bpeak; 
-  marsh_vert_rate_insec(iic)=marsh_vert_rate(iic)/(365*86400) ; % vertical accretion in mm.s
+ %marsh_vert_rate_inyear(iic)=marsh_vert_rate_insec(iic)*(365*86400) ; % vertical accretion in mm.s
  %plot(Depth,Bpeak,'r*')
 %hold on
 end 
 
 figure(1)
- plot( marsh_vert_rate*1000,Dm*100)
+ plot( marsh_vert_rate_inyear*1000,Dm*100)
  xlabel('in mm/year')
  ylabel('depth below MHW in cm')
  
