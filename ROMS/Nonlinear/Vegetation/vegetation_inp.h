@@ -153,13 +153,13 @@
                   exit_flag=5
                   RETURN
                 END IF
-             CASE ('MARSH_BULK_DENS')
-               IF (.not.allocated(MARSH_BULK_DENS))                     &
-     &                allocate(MARSH_BULK_DENS(Ngrids))
-               Npts=load_r(Nval, Rval, Ngrids, Rmarsh)
-               DO ng=1,Ngrids
-                 MARSH_BULK_DENS(ng)=Rmarsh(ng)
-               END DO
+!             CASE ('MARSH_BULK_DENS')
+!               IF (.not.allocated(MARSH_BULK_DENS))                     &
+!     &                allocate(MARSH_BULK_DENS(Ngrids))
+!               Npts=load_r(Nval, Rval, Ngrids, Rmarsh)
+!               DO ng=1,Ngrids
+!                 MARSH_BULK_DENS(ng)=Rmarsh(ng)
+!               END DO
              CASE ('NUGP')
                IF (.not.allocated(NUGP))                                &
      &                allocate(NUGP(Ngrids))
@@ -339,6 +339,13 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmvg,:))
+            CASE ('Hout(idTmvt)')
+              IF (idTmvt.eq.0) THEN
+                IF (Master) WRITE (out,40) 'idTmvt'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idTmvt,:))
             CASE ('Hout(idTmbp)')
               IF (idTmbp.eq.0) THEN
                 IF (Master) WRITE (out,40) 'idTmbp'
@@ -388,13 +395,13 @@
 	   WRITE(out,130) PAR_FAC1(ng)
 	   WRITE(out,140) PAR_FAC2(ng)
            WRITE(out,150) TDAYS_MARSH_GROWTH
-	   WRITE(out,160) MARSH_BULK_DENS(ng)
-           WRITE (out,170) NUGP(ng)
-	   WRITE (out,180) BMAX(ng)
-	   WRITE (out,190) CHIREF(ng)
+!	   WRITE(out,160) MARSH_BULK_DENS(ng)
+           WRITE (out,160) NUGP(ng)
+	   WRITE (out,170) BMAX(ng)
+	   WRITE (out,180) CHIREF(ng)
 #  ifdef MARSH_BIOMASS_VEG 
-           WRITE (out,210)
-	   WRITE (out,220) ALPHA_PDENS(ng), BETA_PDENS(ng),             &
+           WRITE (out,190)
+	   WRITE (out,200) ALPHA_PDENS(ng), BETA_PDENS(ng),             &
      &                     ALPHA_PHGHT(ng), BETA_PHGHT(ng),             & 
      &                     ALPHA_PDIAM(ng), BETA_PDIAM(ng) 
 #  endif

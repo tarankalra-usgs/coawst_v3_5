@@ -576,8 +576,7 @@
         IF (FoundError(exit_flag, NoError, __LINE__,                    &
      &                 __FILE__)) RETURN
 #endif
-#if defined SEDIMENT && ( defined SED_MORPH    \               
-                         || defined MARSH_BIOMASS_MORPH )
+#if defined SEDIMENT && defined SED_MORPH                
 !
 !  Define time-varying bathymetry.
 !
@@ -5233,8 +5232,7 @@
           exit_flag=3
           RETURN
         END IF
-#if defined SEDIMENT && ( defined SED_MORPH    \               
-                         || defined MARSH_BIOMASS_MORPH )
+#if defined SEDIMENT && defined SED_MORPH                  
         IF (.not.got_var(idbath).and.Hout(idbath,ng)) THEN
           IF (Master) WRITE (stdout,70) TRIM(Vname(1,idbath)),          &
      &                                  TRIM(ncname)

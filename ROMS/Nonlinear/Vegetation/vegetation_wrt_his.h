@@ -30,7 +30,7 @@
 #  endif
      &                       VEG(ng) % plant(:,:,:,i),                  &
      &                       SetFillVal= .FALSE.)
-	  IF (FoundError(status, nf90_noerr, __LINE__,                    &
+	  IF (FoundError(status, nf90_noerr, __LINE__,                  &
        &                   __FILE__)) THEN
             IF (Master) THEN 
               WRITE (stdout,10) TRIM(Vname(1,idvprp(i))), HIS(ng)%Rindex
@@ -56,7 +56,8 @@
 # ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 # endif
-     &                     VEG(ng)%Dissip_veg)
+     &                     VEG(ng)%Dissip_veg,                          &
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN 
@@ -82,7 +83,8 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_mask) 
+     &                     VEG(ng)%marsh_mask,                          & 
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN 
@@ -106,7 +108,8 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%Thrust_total)                         
+     &                     VEG(ng)%Thrust_total,                        &
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
@@ -134,7 +137,8 @@
 #   ifdef MASKING
      &                       GRID(ng) % rmask,                          &
 #   endif
-     &                       VEG(ng) % marsh_flux_out(:,:,i))
+     &                       VEG(ng) % marsh_flux_out(:,:,i),           &
+     &                       SetFillVal= .FALSE.)
           IF (FoundError(status, nf90_noerr, __LINE__,                  &
      &                   __FILE__)) THEN
             IF (Master) THEN
@@ -161,7 +165,8 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_retreat)
+     &                     VEG(ng)%marsh_retreat,                       &
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
@@ -188,7 +193,8 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_tidal_range)
+     &                     VEG(ng)%marsh_tidal_range,                   &
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
@@ -211,7 +217,8 @@
 #   ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #   endif
-     &                     VEG(ng)%marsh_high_water) 
+     &                     VEG(ng)%marsh_high_water,                    & 
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
@@ -236,7 +243,8 @@
 #    ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #    endif
-     &                     VEG(ng)%marsh_biomass_peak)
+     &                     VEG(ng)%marsh_biomass_peak,                  & 
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
@@ -248,7 +256,7 @@
         END IF
       END IF
 !
-!  Write amount of marsh vertical growth.
+!  Write rate of marsh vertical growth in m/year.
 !
       IF (Hout(idTmvg,ng)) THEN
         scale=1.0_r8
@@ -259,11 +267,36 @@
 #    ifdef MASKING
      &                     GRID(ng) % rmask,                            &
 #    endif
-     &                     VEG(ng)%marsh_vert)
+     &                     VEG(ng)%marsh_vert_rate,                     & 
+     &                     SetFillVal= .FALSE.)
         IF (FoundError(status, nf90_noerr, __LINE__,                    &
      &                   __FILE__)) THEN
           IF (Master) THEN
             WRITE (stdout,10) TRIM(Vname(1,idTmvg)), HIS(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END IF
+!
+!  Write amount of marsh vertical growth in m.
+!
+      IF (Hout(idTmvt,ng)) THEN
+        scale=1.0_r8
+        gtype=gfactor*r2dvar
+        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTmvt), &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+#    ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+#    endif
+     &                     VEG(ng)%marsh_accret,                        & 
+     &                     SetFillVal= .FALSE.)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idTmvt)), HIS(ng)%Rindex
           END IF
           exit_flag=3
           ioerror=status

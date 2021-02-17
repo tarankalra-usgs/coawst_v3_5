@@ -75,7 +75,8 @@
      &                       VEG(ng) % plant,                           &
 #  endif 
      &                       VEG(ng) % marsh_biomass_peak,              &
-     &                       VEG(ng) % marsh_vert)
+     &                       VEG(ng) % marsh_vert_rate,                 &
+     &                       VEG(ng) % marsh_accret)
 
       END SUBROUTINE marsh_vert_growth
 
@@ -95,7 +96,8 @@
      &                             plant,                               &
 #  endif 
      &                             marsh_biomass_peak,                  &
-     &                             marsh_vert)
+     &                             marsh_vert_rate,                     &
+     &                             marsh_accret)
 !***********************************************************************
 !
       USE mod_grid
@@ -132,7 +134,8 @@
       real(r8), intent(inout) :: plant(LBi:,LBj:,:,:)
 #  endif
       real(r8), intent(inout) :: marsh_biomass_peak(LBi:,LBj:)
-      real(r8), intent(inout) :: marsh_vert(LBi:,LBj:)
+      real(r8), intent(inout) :: marsh_vert_rate(LBi:,LBj:)
+      real(r8), intent(inout) :: marsh_accret(LBi:,LBj:)
 # else
       real(r8), intent(inout) :: marsh_mask(LBi:UBi,LBj:UBj)
       real(r8), intent(inout) :: h(LBi:UBi,LBj:UBj)
@@ -145,7 +148,8 @@
       real(r8), intent(inout) :: plant(LBi:UBi,LBj:UBj,NVEG,NVEGP)
 #  endif
       real(r8), intent(inout) :: marsh_biomass_peak(LBi:UBi,LBj:UBj)
-      real(r8), intent(inout) :: marsh_vert(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: marsh_vert_rate(LBi:UBi,LBj:UBj)
+      real(r8), intent(inout) :: marsh_accret(LBi:UBi,LBj:UBj)
 # endif
 !
 !  Local variable declarations.
@@ -155,7 +159,7 @@
       real(r8) :: Bpeak, Rref, AMC
       real(r8) :: ramp, cff 
       real(r8) :: marsh_bulk_density
-      real(r8) :: marsh_vert_rate, marsh_vert_rate_insec
+      real(r8) :: marsh_vert_rate_insec
       real(r8) :: slope_in_meter,  marsh_organic_matter
 !      real(r8), parameter :: lower_lev=1.0e-9 ! 800-1000 kg/m3 
       real(r8), parameter ::                                            &
@@ -179,7 +183,7 @@
             Dmin=marsh_high_water(i,j)
             Dmax=Par_fac1(ng)*2.0_r8*Dmin+Par_fac2(ng)+Dmin
 !
-            Depth=ABS(h(i,j))
+            Depth=-h(i,j)
 !
 ! scales parabola from 0 to 1 in next line.
 !
@@ -193,10 +197,10 @@
 !
             Bpeak=MAX(Bpeak,0.0_r8)*marsh_mask(i,j)
 !
-! Amount of below ground biomass. 
+! Integrated per year amount of below ground biomass. 
 !  kg/(sq.m-year) 
 !
-            AMC=Bpeak*nuGp(ng)
+            AMC=180.0_r8*Bpeak*nuGp(ng)
           ELSE
 ! 
 ! 180 growing days, after 180 days make AMC=0, Bpeak=0.0.
@@ -218,17 +222,17 @@
 !  marsh_vert_rate is kg/(sq.m-year)/(kg/m^3) = m/year
 !    (0.9 is the porosity! )
 !
-          marsh_bulk_density=Srho(1,ng)*(1.0_r8-bed(i,j,1,iporo))
-          marsh_vert_rate   =(Rref/marsh_bulk_density)
+          marsh_bulk_density   =Srho(1,ng)*(1.0_r8-bed(i,j,1,iporo))
+          marsh_vert_rate(i,j) =(Rref/marsh_bulk_density)
 !
 !  convert m/year to m/s 
 ! 
-          marsh_vert_rate_insec=marsh_vert_rate*one_over_year2sec
+          marsh_vert_rate_insec=marsh_vert_rate(i,j)*one_over_year2sec
 ! 
 ! convert the rate to m of accretion 
 !
           slope_in_meter =marsh_vert_rate_insec*dt(ng) 
-          marsh_vert(i,j)=marsh_vert(i,j)+slope_in_meter
+          marsh_accret(i,j)=marsh_accret(i,j)+slope_in_meter
 !          
 ! Assuming that organic sed in class 1, add bed mass. 
 ! marsh_bulk_density = kg/(m^3) (1-poro)*srho. 
@@ -281,10 +285,12 @@
       CALL bc_r2d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj,                             &
      &                  marsh_biomass_peak)
-!
       CALL bc_r2d_tile (ng, tile,                                       &
      &                  LBi, UBi, LBj, UBj,                             &
-     &                  marsh_vert)
+     &                  marsh_vert_rate)
+      CALL bc_r2d_tile (ng, tile,                                       &
+     &                  LBi, UBi, LBj, UBj,                             &
+     &                  marsh_accret)
 !
 #  if defined MARSH_BIOMASS_VEG
       CALL bc_r2d_tile (ng, tile,                                       &
@@ -306,11 +312,13 @@
      &                    EWperiodic(ng), NSperiodic(ng),               &
      &                    bed_mass(:,:,:,nnew,:))
 !
-      CALL mp_exchange2d (ng, tile, iNLM, 2,                            &
+      CALL mp_exchange2d (ng, tile, iNLM, 3,                            &
      &                        LBi, UBi, LBj, UBj,                       &
      &                        NghostPoints,                             &
      &                        EWperiodic(ng), NSperiodic(ng),           &
-     &                        marsh_biomass_peak, marsh_vert)
+     &                        marsh_biomass_peak,                       &
+     &                        marsh_vert_rate,                          &
+     &                        marsh_accret)
 !
 #  if defined MARSH_BIOMASS_VEG
       CALL mp_exchange2d (ng, tile, iNLM, 1,                            &

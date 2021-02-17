@@ -87,6 +87,8 @@
 	      idTmbp=varid 
 	    CASE('idTmvg')
 	      idTmvg=varid 
+	    CASE('idTmvt')
+	      idTmvt=varid 
 #  endif   	      
 # endif  
 #endif   

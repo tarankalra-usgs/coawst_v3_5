@@ -61,7 +61,8 @@
 !  marsh_tidal_range  Mean tidal range  (MHHW-MLLW)                    !
 #   if defined MARSH_VERT_GROWTH                                       
 !  marsh_biomass_peak Peak biomass on marsh                            !
-!  marsh_vert         Vertical growth of marsh                         !
+!  marsh_vert_rate    Vertical rate of marsh growth (m/yr)             !
+!  marsh_accret       Total accretion in marsh elevation (m)           !
 #   endif                                 
 #  endif                                                               
 #endif                                                                  
@@ -136,7 +137,8 @@
 	real(r8) :: counter_loc_rl
 #   if defined MARSH_VERT_GROWTH 	
         real(r8), pointer :: marsh_biomass_peak(:,:)
-        real(r8), pointer :: marsh_vert(:,:)
+        real(r8), pointer :: marsh_vert_rate(:,:)
+        real(r8), pointer :: marsh_accret(:,:)
 #   endif 
 #  endif
 # endif 
@@ -232,7 +234,8 @@
       allocate ( VEG(ng) % marsh_tidal_range(LBi:UBi,LBj:UBj))
 #   if defined MARSH_VERT_GROWTH                                                                  
       allocate ( VEG(ng) % marsh_biomass_peak(LBi:UBi,LBj:UBj) )
-      allocate ( VEG(ng) % marsh_vert(LBi:UBi,LBj:UBj) )
+      allocate ( VEG(ng) % marsh_vert_rate(LBi:UBi,LBj:UBj) )
+      allocate ( VEG(ng) % marsh_accret(LBi:UBi,LBj:UBj) )
 #   endif
 #  endif	
 # endif
@@ -406,7 +409,7 @@
 #  ifdef MARSH_WAVE_THRUST 
         DO j=Jmin,Jmax
           DO i=Imin,Imax
-            VEG(ng) % marsh_mask(i,j)    = IniVal
+!            VEG(ng) % marsh_mask(i,j)    = IniVal
             VEG(ng) % umask_marsh(i,j)   = IniVal
             VEG(ng) % vmask_marsh(i,j)   = IniVal
             VEG(ng) % Thrust_xi(i,j)     = IniVal
@@ -458,7 +461,8 @@
         DO j=Jmin,Jmax
           DO i=Imin,Imax
             VEG(ng) % marsh_biomass_peak(i,j)  = IniVal
-            VEG(ng) % marsh_vert(i,j)          = IniVal
+            VEG(ng) % marsh_vert_rate(i,j)     = IniVal
+            VEG(ng) % marsh_accret(i,j)        = IniVal
 	  END DO 
         END DO
 #   endif 

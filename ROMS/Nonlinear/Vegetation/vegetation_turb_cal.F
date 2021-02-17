@@ -144,7 +144,8 @@
       real(r8), parameter :: Inival=0.0_r8
       real(r8), parameter :: cl_veg=1.0_r8, ck=0.09_r8
       real(r8), parameter :: max_L=10.0e10_r8 
-      real(r8), parameter :: eps=1.0e-12_r8 
+      real(r8), parameter :: min_eps=1.0e-12_r8 
+      real(r8), parameter :: max_eps=1.0e14_r8 
       real(r8) :: wrku1, wrku2, wrku3, wrku4, wrku
       real(r8) :: wrkv1, wrkv2, wrkv3, wrkv4, wrkv
       real(r8) :: wrk, cff1, cff2, cff3, dissip, inverse_dissip
@@ -199,7 +200,8 @@
               wrk=MAX(tke(i,j,k,nstp),gls_Kmin(ng))
               dissip=(gls_cmu0(ng)**cff1)*(wrk**cff2)*                  &
      &                 (gls(i,j,k,nstp)**cff3)
-              inverse_dissip=1.0_r8/MAX(dissip,eps)
+!              inverse_dissip=1.0_r8/MAX(dissip,min_eps)
+              inverse_dissip=MAX( (1.0_r8/dissip), max_eps)
 !
 ! Dissipation time-scale for free turbulence
 !
@@ -229,7 +231,9 @@
 !
 ! Dissipation time-scale of eddies in between the plants
 !
-              tauveg=(L**2.0_r8/(ck**2.0_r8*tke_loc_veg))**one_third
+              cff2=MIN( (1.0_r8/(ck**2.0_r8*tke_loc_veg)), max_eps )
+              tauveg=(L**2.0_r8*cff2)**one_third
+!              tauveg=(L**2.0_r8/(ck**2.0_r8*tke_loc_veg))**one_third
 !
 ! Effective dissipation time-scale
 ! 

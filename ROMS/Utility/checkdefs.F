@@ -1068,6 +1068,12 @@
       is=LEN_TRIM(Coptions)+1
       Coptions(is:is+19)=' MARSH_VERT_GROWTH,'
 #endif
+#if defined MARSH_BIOMASS_VEG 
+      IF (Master) WRITE (stdout,20) 'MARSH_BIOMASS_VEG',                &
+     &   'Marsh colonization and veg growth with organic sed. in Class 1'
+      is=LEN_TRIM(Coptions)+1
+      Coptions(is:is+17)=' MARSH_BIOMASS_VEG'
+#endif
 #ifdef DIAGNOSTICS_TS
 !
       IF (Master) WRITE (stdout,20) 'DIAGNOSTICS_TS',                   &

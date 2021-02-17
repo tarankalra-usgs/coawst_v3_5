@@ -3904,6 +3904,7 @@
   'idSbed(ibodu)'
   'b3dvar'
   1.0d0
+
 'grain_diameter'                                   ! Input/Output
   'sediment median grain diameter size'
   'meter'                                          ! [m]
@@ -3912,6 +3913,16 @@
   'idBott(isd50)'
   'r2dvar'
   1.0d0
+
+'sand_poros'                                       ! Input/Output
+  'sediment porosity'
+  'unitless'                                          ! [m]
+  'sand_poros, scalar, series'
+  'ocean_time'
+  'idBott(itdpor)'
+  'r2dvar'
+  1.0d0
+
 
 'grain_density'                                    ! Input/Output
   'sediment median grain density'
@@ -9538,10 +9549,10 @@
   'r2dvar' 
    1.0d0
 
-'marsh_vert'                                      ! Output
-  'Amount of marsh vertical growth.'
-  'm'     
-  'marsh_vert, scalar, series'                    ! [m]
+'marsh_vert_rate'                                 ! Output
+  'Rate of marsh vertical growth.'
+  'm/year'     
+  'marsh_vert_rate, scalar, series'               ! [m/year]
   'ocean_time'
   'idTmvg'
   'r2dvar' 
@@ -9554,5 +9565,14 @@
   'ocean_time'
   'idTmbp'
   'r2dvar'
+   1.0d0
+
+'marsh_accret'                                   ! Output
+  'Amount of marsh vertical growth.'
+  'm'     
+  'marsh_accret, scalar, series'                 ! [m]
+  'ocean_time'
+  'idTmvt'
+  'r2dvar' 
    1.0d0
 
