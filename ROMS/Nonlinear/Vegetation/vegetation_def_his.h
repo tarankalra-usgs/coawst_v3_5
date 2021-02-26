@@ -141,7 +141,7 @@
 #   endif  
 #  endif  
 # endif 
-# ifdef MARSH_TIDAL_RANGE 
+# ifdef MARSH_TIDAL_RANGE_CALC
 !
 !  Amount of marsh tidal range over a given frequency. 
 !
@@ -160,6 +160,9 @@
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
         END IF
+# endif 
+!
+# if defined MARSH_VERT_GROWTH 	
 !
 !  Amount of marsh mean high water over a given frequency. 
 !
@@ -179,9 +182,25 @@
           IF (exit_flag.ne.NoError) RETURN
 	END IF 
 !
-#  if defined MARSH_VERT_GROWTH 	
+!  Amount of marsh mean low water over a given frequency. 
 !
-!  Amount of marsh biomass peak (kg/sq.m)
+        IF (Hout(idTmlw,ng)) THEN 
+          Vinfo( 1)=Vname(1,idTmlw)
+          Vinfo( 2)=Vname(2,idTmlw)
+          Vinfo( 3)=Vname(3,idTmlw)
+          Vinfo(14)=Vname(4,idTmlw)
+          Vinfo(16)=Vname(1,idtime)
+#  if defined WRITE_WATER && defined MASKING
+          Vinfo(20)='mask_rho'
+#  endif
+          Vinfo(22)='coordinates'
+          Aval(5)=REAL(Iinfo(1,idTmlw,ng),r8)
+          status=def_var(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTmlw),   &
+     &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
+          IF (exit_flag.ne.NoError) RETURN
+	END IF 
+!
+!  Amount of marsh biomass peak (kg/sq.m).
 !
         IF (Hout(idTmbp,ng)) THEN 
           Vinfo( 1)=Vname(1,idTmbp)
@@ -199,7 +218,7 @@
           IF (exit_flag.ne.NoError) RETURN
         END IF
 !
-!  Rate of marsh vertical growth (m/year)
+!  Rate of marsh vertical growth (m/year).
 !
         IF (Hout(idTmvg,ng)) THEN 
           Vinfo( 1)=Vname(1,idTmvg)
@@ -217,7 +236,7 @@
           IF (exit_flag.ne.NoError) RETURN
         END IF
 !
-!  Amount of marsh vertical growth (m)
+!  Amount of marsh vertical growth (m).
 !
         IF (Hout(idTmvt,ng)) THEN 
           Vinfo( 1)=Vname(1,idTmvt)
@@ -234,6 +253,5 @@
      &                   NF_FOUT, nvd3, t2dgrd, Aval, Vinfo, ncname)
           IF (exit_flag.ne.NoError) RETURN
         END IF
-#  endif 
 # endif  
 #endif   

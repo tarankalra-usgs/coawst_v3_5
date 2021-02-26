@@ -180,7 +180,7 @@
 #  endif 
 !# endif 
 !
-#  if defined MARSH_TIDAL_RANGE
+#  if defined MARSH_TIDAL_RANGE_CALC
 !
 !  Write tidal range over a given frequency.
 !
@@ -205,6 +205,9 @@
           RETURN
         END IF
       END IF
+#  endif 
+!
+#  if  defined MARSH_VERT_GROWTH 
 !
 !  Write mean high high water over a given frequency.
 !
@@ -230,7 +233,29 @@
         END IF
       END IF
 !
-#   if  defined MARSH_VERT_GROWTH 
+!  Write mean low water over a given frequency.
+!
+      IF (Hout(idTmlw,ng)) THEN
+        scale=1.0_r8
+        gtype=gfactor*r2dvar
+        status=nf_fwrite2d(ng, iNLM, HIS(ng)%ncid, HIS(ng)%Vid(idTmlw), &
+     &                     HIS(ng)%Rindex, gtype,                       &
+     &                     LBi, UBi, LBj, UBj, scale,                   &
+#   ifdef MASKING
+     &                     GRID(ng) % rmask,                            &
+#   endif
+     &                     VEG(ng)%marsh_low_water,                     & 
+     &                     SetFillVal= .FALSE.)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                   __FILE__)) THEN
+          IF (Master) THEN
+            WRITE (stdout,10) TRIM(Vname(1,idTmlw)), HIS(ng)%Rindex
+          END IF
+          exit_flag=3
+          ioerror=status
+          RETURN
+        END IF
+      END IF
 !
 !  Write amount of marsh biomass peak.
 !
@@ -303,6 +328,5 @@
           RETURN
         END IF
       END IF
-#   endif 
 #  endif  
 # endif  

@@ -2,7 +2,7 @@
 
       MODULE marsh_vert_growth_mod
 !
-#if defined MARSH_VERT_GROWTH && defined MARSH_TIDAL_RANGE
+#if defined MARSH_VERT_GROWTH 
 !
 !svn $Id: marsh_vert_growth.F 429 2015-04-20 17:30:26Z arango $
 !======================================================================!
@@ -70,7 +70,10 @@
      &                       SEDBED(ng) % bed_mass,                     &
      &                       VEG(ng) % marsh_mask,                      &
      &                       VEG(ng) % marsh_high_water,                &
+     &                       VEG(ng) % marsh_low_water,                 &
+#  if defined MARSH_TIDAL_RANGE_CALC 
      &                       VEG(ng) % marsh_tidal_range,               &
+#  endif 
 #  if defined MARSH_BIOMASS_VEG
      &                       VEG(ng) % plant,                           &
 #  endif 
@@ -91,7 +94,10 @@
      &                             bed_mass,                            &
      &                             marsh_mask,                          &
      &                             marsh_high_water,                    &
+     &                             marsh_low_water,                     &
+#  if defined MARSH_TIDAL_RANGE_CALC 
      &                             marsh_tidal_range,                   &
+#  endif 
 #  if defined MARSH_BIOMASS_VEG
      &                             plant,                               &
 #  endif 
@@ -129,7 +135,10 @@
       real(r8), intent(in)    :: bed(LBi:,LBj:,:,:)
       real(r8), intent(inout) :: bed_mass(LBi:,LBj:,:,:,:)
       real(r8), intent(in)    :: marsh_high_water(LBi:,LBj:)
+      real(r8), intent(in)    :: marsh_low_water(LBi:,LBj:)
+#  if defined MARSH_TIDAL_RANGE_CALC 
       real(r8), intent(in)    :: marsh_tidal_range(LBi:,LBj:)
+#  endif
 #  if defined MARSH_BIOMASS_VEG
       real(r8), intent(inout) :: plant(LBi:,LBj:,:,:)
 #  endif
@@ -143,7 +152,10 @@
       real(r8), intent(in)    :: bed(LBi:UBi,LBj:UBj,Nbed,MBEDP)
       real(r8), intent(inout) :: bed_mass(LBi:UBi,LBj:UBj,Nbed,1:2,NST)
       real(r8), intent(in)    :: marsh_high_water(LBi:UBi,LBj:UBj)
+      real(r8), intent(in)    :: marsh_low_water(LBi:UBi,LBj:UBj)
+#  if defined MARSH_TIDAL_RANGE_CALC 
       real(r8), intent(in)    :: marsh_tidal_range(LBi:UBi,LBj:UBj)
+#  endif
 #  if defined MARSH_BIOMASS_VEG
       real(r8), intent(inout) :: plant(LBi:UBi,LBj:UBj,NVEG,NVEGP)
 #  endif
@@ -156,7 +168,7 @@
 !
       integer  :: i, j, k, ised
       real(r8) :: Dmin, Dmax, depth
-      real(r8) :: Bpeak, Rref, AMC
+      real(r8) :: Samp, Bpeak, Rref, AMC
       real(r8) :: ramp, cff 
       real(r8) :: marsh_bulk_density
       real(r8) :: marsh_vert_rate_insec
@@ -172,16 +184,23 @@
 # include "set_bounds.h"
 !      
 !  ramp could be used to introduce vegetation in the flow. 
-!     
-      ramp=MIN( DBLE(FLOOR(tdays(ng)/NTIMES_MARSH)),  1.0_r8 )
+! Ntimes marsh only activated with marsh tidalrange calc     
+!      ramp=MIN( DBLE(FLOOR(tdays(ng)/NTIMES_MARSH)),  1.0_r8 )
 !
       J_LOOP: DO j=Jstr,Jend
         DO i=Istr,Iend
 !
-          IF(tdays(ng).lt.tdays_marsh_growth) THEN 
-!                  
+          IF(tdays(ng).lt.tdays_marsh_growth(ng)) THEN 
+!
+#  if defined MARSH_KIRWAN_FORMULATION                  
             Dmin=marsh_high_water(i,j)
             Dmax=Par_fac1(ng)*2.0_r8*Dmin+Par_fac2(ng)+Dmin
+#  endif
+#  if defined MARSH_MCKEE_FORMULATION 
+            Samp=marsh_high_water(i,j)-marsh_low_water(i,j)
+            Dmin= 0.429_r8*Samp**2.0_r8+0.253_r8-Samp
+            Dmax=-0.237_r8*Samp**2.0_r8+0.092_r8-Samp
+#  endif              
 !
             Depth=-h(i,j)
 !
@@ -200,7 +219,7 @@
 ! Integrated per year amount of below ground biomass. 
 !  kg/(sq.m-year) 
 !
-            AMC=180.0_r8*Bpeak*nuGp(ng)
+            AMC=tdays_marsh_growth(ng)*Bpeak*nuGp(ng)
           ELSE
 ! 
 ! 180 growing days, after 180 days make AMC=0, Bpeak=0.0.
@@ -222,17 +241,17 @@
 !  marsh_vert_rate is kg/(sq.m-year)/(kg/m^3) = m/year
 !    (0.9 is the porosity! )
 !
-          marsh_bulk_density   =Srho(1,ng)*(1.0_r8-bed(i,j,1,iporo))
-          marsh_vert_rate(i,j) =(Rref/marsh_bulk_density)
+          marsh_bulk_density    =Srho(1,ng)*(1.0_r8-bed(i,j,1,iporo))
+          marsh_vert_rate(i,j)  =(Rref/marsh_bulk_density)
 !
 !  convert m/year to m/s 
 ! 
-          marsh_vert_rate_insec=marsh_vert_rate(i,j)*one_over_year2sec
+          marsh_vert_rate_insec =marsh_vert_rate(i,j)*one_over_year2sec
 ! 
 ! convert the rate to m of accretion 
 !
-          slope_in_meter =marsh_vert_rate_insec*dt(ng) 
-          marsh_accret(i,j)=marsh_accret(i,j)+slope_in_meter
+          slope_in_mete  r      =marsh_vert_rate_insec*dt(ng) 
+          marsh_accret(i,j)     =marsh_accret(i,j)+slope_in_meter
 !          
 ! Assuming that organic sed in class 1, add bed mass. 
 ! marsh_bulk_density = kg/(m^3) (1-poro)*srho. 
@@ -242,29 +261,27 @@
       &                          marsh_organic_matter
 ! 
 #  if defined MARSH_BIOMASS_VEG
-          IF(tdays(ng).gt.NTIMES_MARSH) THEN
+!          IF(tdays(ng).gt.tdays_marsh_growth) THEN
 !
 ! Colonize if marsh biomass production (Bpeak)>0.0
 !
-            marsh_mask(i,j)=MIN(1.0_r8,MAX(Bpeak,0.0_r8))
+          marsh_mask(i,j)=MIN(1.0_r8,MAX(Bpeak,0.0_r8))
 !
-            DO iveg=1,NVEG
+          DO iveg=1,NVEG
 ! 
 ! Inside veg loop to change veg properties based on Bpeak
 !
-              cff=( (Bpeak*1000.0_r8)**beta_pdens(ng) )*marsh_mask(i,j)
-              plant(i,j,iveg,pdens)=alpha_pdens(ng)*cff
+            cff=( (Bpeak*1000.0_r8)**beta_pdens(ng) )*marsh_mask(i,j)
+            plant(i,j,iveg,pdens)=alpha_pdens(ng)*cff
 ! 
-              cff=( (Bpeak*1000.0_r8)**beta_phght(ng) )*marsh_mask(i,j)
-              plant(i,j,iveg,phght)=alpha_phght(ng)*cff
+            cff=( (Bpeak*1000.0_r8)**beta_phght(ng) )*marsh_mask(i,j)
+            plant(i,j,iveg,phght)=alpha_phght(ng)*cff
 ! 
-              cff=( (Bpeak*1000.0_r8)**beta_pdiam(ng) )*marsh_mask(i,j)
-              plant(i,j,iveg,pdiam)=alpha_pdiam(ng)*cff
+            cff=( (Bpeak*1000.0_r8)**beta_pdiam(ng) )*marsh_mask(i,j)
+            plant(i,j,iveg,pdiam)=alpha_pdiam(ng)*cff
 !
-!              plant(i,j,iveg,pthck)=plant(i,j,iveg,pthck)*
-!              &                              marsh_mask(i,j)
-            END DO
-          END IF
+          END DO
+!          END IF
 #  endif
         END DO
       END DO J_LOOP

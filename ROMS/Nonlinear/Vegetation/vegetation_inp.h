@@ -119,7 +119,7 @@
                  END DO
 # endif 
 #endif
-#if defined MARSH_TIDAL_RANGE
+#if defined MARSH_TIDAL_RANGE_CALC
             CASE ('NTIMES_MARSH') 
               Npts=load_i(Nval, Rval, Ngrids, NTIMES_MARSH)
                 IF (NTIMES_MARSH.lt.0) THEN
@@ -315,7 +315,7 @@
 #   endif 
 #  endif 
 # endif 
-# ifdef MARSH_TIDAL_RANGE 
+# ifdef MARSH_TIDAL_RANGE_CALC 
             CASE ('Hout(idTmtr)')
               IF (idTmtr.eq.0) THEN
                 IF (Master) WRITE (out,40) 'idTmtr'
@@ -323,6 +323,9 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmtr,1:Ngrids))
+# endif 
+!
+# ifdef MARSH_VERT_GROWTH 
             CASE ('Hout(idTmhw)')
               IF (idTmhw.eq.0) THEN
                 IF (Master) WRITE (out,40) 'idTmhw'
@@ -330,8 +333,13 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmhw,1:Ngrids))
-!
-#  ifdef MARSH_VERT_GROWTH 
+            CASE ('Hout(idTmlw)')
+              IF (idTmlw.eq.0) THEN
+                IF (Master) WRITE (out,40) 'idTmlw'
+                exit_flag=5
+                RETURN
+              END IF
+              Npts=load_l(Nval, Cval, Ngrids, Hout(idTmlw,1:Ngrids))
             CASE ('Hout(idTmvg)')
               IF (idTmvg.eq.0) THEN
                 IF (Master) WRITE (out,40) 'idTmvg'
@@ -353,7 +361,6 @@
                 RETURN
               END IF
               Npts=load_l(Nval, Cval, Ngrids, Hout(idTmbp,1:Ngrids))
-#  endif 
 # endif 
 #endif
           END SELECT
@@ -386,7 +393,7 @@
 # if defined MARSH_RETREAT 
            WRITE (out,100)  SCARP_HGHT(ng)
 # endif 
-# ifdef MARSH_TIDAL_RANGE
+# ifdef MARSH_TIDAL_RANGE_CALC 
 !           WRITE (out,110)
            WRITE (out,120) NTIMES_MARSH
 # endif 
@@ -433,7 +440,7 @@
 #  endif 
 !  110  FORMAT (1x,l1,2x,a,t29,a,i2.2,':',1x,a)
 # endif 
-# ifdef MARSH_TIDAL_RANGE
+# ifdef MARSH_TIDAL_RANGE_CALC
   120  FORMAT ('Days after marsh production starts     = ', i4,/,a)
 # endif
 # ifdef MARSH_VERT_GROWTH 

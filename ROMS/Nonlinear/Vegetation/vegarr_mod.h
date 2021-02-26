@@ -54,17 +54,18 @@
 #  if defined MARSH_RETREAT                                            
 !  marsh_retreat  Amount of marsh retreat                              !
 #  endif                                                               
-#  if defined MARSH_TIDAL_RANGE                                                                     
+#  if defined MARSH_TIDAL_RANGE_CALC                                                                     
 !  zeta_max_rec   Record mean high high water (MHHW)                   !
 !  zeta_min_rec   Record mean low low water (MLLW)                     !
-!  marsh_high_water   Record mean high high water                      !
 !  marsh_tidal_range  Mean tidal range  (MHHW-MLLW)                    !
-#   if defined MARSH_VERT_GROWTH                                       
+#  endif                                                               
+#  if defined MARSH_VERT_GROWTH                                       
+!  marsh_high_water   Read or record mean high water                   !
+!  marsh_low_water    Read mean low water                              !
 !  marsh_biomass_peak Peak biomass on marsh                            !
 !  marsh_vert_rate    Vertical rate of marsh growth (m/yr)             !
 !  marsh_accret       Total accretion in marsh elevation (m)           !
-#   endif                                 
-#  endif                                                               
+#  endif                                 
 #endif                                                                  
 !                                                                      !
 !======================================================================!
@@ -126,20 +127,21 @@
 #  if defined MARSH_STOCH
         real(r8), pointer :: marsh_stoch(:,:)
 #  endif 
-#  if defined MARSH_TIDAL_RANGE                                                                     
+#  if defined MARSH_TIDAL_RANGE_CALC                                                                    
         real(r8), pointer :: zeta_max1(:,:)
         real(r8), pointer :: zeta_min1(:,:)
         real(r8), pointer :: zeta_max_rec(:,:,:)
         real(r8), pointer :: zeta_min_rec(:,:,:)
-        real(r8), pointer :: marsh_high_water(:,:)
         real(r8), pointer :: marsh_tidal_range(:,:)
 !        integer, pointer  :: counter_dim(:)
 	real(r8) :: counter_loc_rl
-#   if defined MARSH_VERT_GROWTH 	
+#  endif
+#  if defined MARSH_VERT_GROWTH 	
+        real(r8), pointer :: marsh_high_water(:,:)
+        real(r8), pointer :: marsh_low_water(:,:)
         real(r8), pointer :: marsh_biomass_peak(:,:)
         real(r8), pointer :: marsh_vert_rate(:,:)
         real(r8), pointer :: marsh_accret(:,:)
-#   endif 
 #  endif
 # endif 
 !
@@ -224,19 +226,20 @@
 #  if defined MARSH_STOCH
       allocate ( VEG(ng) % marsh_stoch(LBi:UBi,LBj:UBj ) )
 #  endif 
-#  if defined MARSH_TIDAL_RANGE                                                                     
+#  if defined MARSH_TIDAL_RANGE_CALC                                                                    
       allocate ( VEG(ng) % zeta_max1(LBi:UBi,LBj:UBj ) )
       allocate ( VEG(ng) % zeta_min1(LBi:UBi,LBj:UBj ) )
       allocate ( VEG(ng) % zeta_max_rec(LBi:UBi,LBj:UBj,NTIMES_MARSH ) )
       allocate ( VEG(ng) % zeta_min_rec(LBi:UBi,LBj:UBj,NTIMES_MARSH ) )
 !      allocate ( VEG(ng) % counter_dim(NTIMES_MARSH ) )
-      allocate ( VEG(ng) % marsh_high_water(LBi:UBi,LBj:UBj))
       allocate ( VEG(ng) % marsh_tidal_range(LBi:UBi,LBj:UBj))
-#   if defined MARSH_VERT_GROWTH                                                                  
+#  endif
+#  if defined MARSH_VERT_GROWTH                                                                  
+      allocate ( VEG(ng) % marsh_high_water(LBi:UBi,LBj:UBj))
+      allocate ( VEG(ng) % marsh_low_water(LBi:UBi,LBj:UBj))
       allocate ( VEG(ng) % marsh_biomass_peak(LBi:UBi,LBj:UBj) )
       allocate ( VEG(ng) % marsh_vert_rate(LBi:UBi,LBj:UBj) )
       allocate ( VEG(ng) % marsh_accret(LBi:UBi,LBj:UBj) )
-#   endif
 #  endif	
 # endif
 
@@ -437,7 +440,7 @@
           END DO 
         END DO 
 #  endif 
-#  if defined MARSH_TIDAL_RANGE
+#  if defined MARSH_TIDAL_RANGE_CALC
         VEG(ng) % counter_loc_rl=1.0_r8 ! IniVal
         DO j=Jmin,Jmax
           DO i=Imin,Imax
@@ -452,20 +455,21 @@
           DO i=Imin,Imax
             VEG(ng) % zeta_max1(i,j)         = -10.0_r8 ! IniVal
             VEG(ng) % zeta_min1(i,j)         =  10.0_r8 ! IniVal
-
-            VEG(ng) % marsh_high_water(i,j)  = IniVal
-            VEG(ng) % marsh_tidal_range(i,j) = IniVal
           END DO 
         END DO 
-#   if defined MARSH_VERT_GROWTH 
+        VEG(ng) % marsh_tidal_range(i,j) = IniVal
+#  endif
+#  if defined MARSH_VERT_GROWTH 
         DO j=Jmin,Jmax
           DO i=Imin,Imax
+            VEG(ng) % marsh_high_water(i,j)  = IniVal
+            VEG(ng) % marsh_low_water(i,j)   = IniVal
+!
             VEG(ng) % marsh_biomass_peak(i,j)  = IniVal
             VEG(ng) % marsh_vert_rate(i,j)     = IniVal
             VEG(ng) % marsh_accret(i,j)        = IniVal
 	  END DO 
         END DO
-#   endif 
 #  endif 
 # endif
 !

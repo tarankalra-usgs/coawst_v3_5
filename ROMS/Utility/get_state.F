@@ -2258,6 +2258,64 @@
           END IF
         END IF
 !
+#    if defined MARSH_VERT_GROWTH 
+!
+!  Read in marsh high water map. 
+!
+        foundit=find_string(var_name, n_var, TRIM(Vname(1,idTmhw)),     & 
+     &                        varid)
+        gtype=var_flag(varid)*r2dvar
+        status=nf_fread2d(ng, IDmod, ncname, ncINPid,                   &
+     &                Vname(1,idTmhw), varid, InpRec, gtype,            &
+     &                Vsize, LBi, UBi, LBj, UBj,                        &
+     &                Fscl, Fmin, Fmax,                                 &
+#    ifdef MASKING
+     &                GRID(ng) % rmask,                                 &
+#    endif
+     &                 VEG(ng) % marsh_high_water)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                         __FILE__)) THEN
+          IF (Master) THEN 
+            WRITE (stdout,60) string, TRIM(Vname(1,idTmhw )),           &
+     &                        InpRec, TRIM(ncname)
+          END IF
+          exit_flag=2
+          ioerror=status
+          RETURN
+        ELSE
+          IF (Master) THEN 
+            WRITE (stdout,70) TRIM(Vname(2,idTmhw)), Fmin, Fmax 
+          END IF
+        END IF
+!
+!  Read in marsh low water map. 
+!
+        foundit=find_string(var_name, n_var, TRIM(Vname(1,idTmlw)),     & 
+     &                        varid)
+        gtype=var_flag(varid)*r2dvar
+        status=nf_fread2d(ng, IDmod, ncname, ncINPid,                   &
+     &                Vname(1,idTmlw), varid, InpRec, gtype,            &
+     &                Vsize, LBi, UBi, LBj, UBj,                        &
+     &                Fscl, Fmin, Fmax,                                 &
+#    ifdef MASKING
+     &                GRID(ng) % rmask,                                 &
+#    endif
+     &                 VEG(ng) % marsh_low_water)
+        IF (FoundError(status, nf90_noerr, __LINE__,                    &
+     &                         __FILE__)) THEN
+          IF (Master) THEN 
+            WRITE (stdout,60) string, TRIM(Vname(1,idTmlw )),           &
+     &                        InpRec, TRIM(ncname)
+          END IF
+          exit_flag=2
+          ioerror=status
+          RETURN
+        ELSE
+          IF (Master) THEN 
+            WRITE (stdout,70) TRIM(Vname(2,idTmlw)), Fmin, Fmax 
+          END IF
+        END IF
+#    endif 
 #   endif 
 #  endif 
 #  if defined BEST_NPZ && defined BERING_10K

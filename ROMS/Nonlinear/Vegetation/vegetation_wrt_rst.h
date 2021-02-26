@@ -178,7 +178,6 @@
         END IF
       END IF 
 #  endif 
-!# endif 
 !
 #  if defined MARSH_TIDAL_RANGE
 !
@@ -205,6 +204,8 @@
           RETURN
         END IF
       END IF
+#   endif 
+#   if  defined MARSH_VERT_GROWTH 
 !
 !  Write mean high high water over a given frequency.
 !
@@ -230,7 +231,6 @@
         END IF
       END IF
 !
-#   if  defined MARSH_VERT_GROWTH 
 !
 !  Write amount of marsh biomass peak.
 !
@@ -279,6 +279,5 @@
           RETURN
         END IF
       END IF
-#   endif 
 #  endif  
 # endif  

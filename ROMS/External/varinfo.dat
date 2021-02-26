@@ -9549,6 +9549,15 @@
   'r2dvar' 
    1.0d0
 
+'marsh_low_water'                                ! Output
+  'marsh mean low water.'
+  'm'     
+  'marsh_low_water, scalar, series'              ! [m]
+  'ocean_time'
+  'idTmlw'
+  'r2dvar' 
+   1.0d0
+
 'marsh_vert_rate'                                 ! Output
   'Rate of marsh vertical growth.'
   'm/year'     
