@@ -146,13 +146,18 @@
                  PAR_FAC2(ng)=Rmarsh(ng)
                END DO
              CASE ('TDAYS_MARSH_GROWTH')
-               Npts=load_i(Nval, Rval, Ngrids, TDAYS_MARSH_GROWTH)
-                IF (TDAYS_MARSH_GROWTH.lt.0) THEN
-                  IF (Master) WRITE (out,30) 'TDAYS_MARSH_GROWTH', ng,  &
-     &              'must be greater than zero.'
-                  exit_flag=5
-                  RETURN
-                END IF
+               IF (.not.allocated(TDAYS_MARSH_GROWTH))                  &
+     &                   allocate(TDAYS_MARSH_GROWTH(Ngrids))
+                 Npts=load_r(Nval, Rval, Ngrids, Rmarsh)
+                 DO ng=1,Ngrids
+                   TDAYS_MARSH_GROWTH(ng)=Rmarsh(ng)
+                 END DO
+                 IF (TDAYS_MARSH_GROWTH(ng).lt.0) THEN
+                   IF (Master) WRITE (out,30) 'TDAYS_MARSH_GROWTH', ng,  &
+     &                'must be greater than zero.'
+                      exit_flag=5
+                   RETURN
+                 END IF
 !             CASE ('MARSH_BULK_DENS')
 !               IF (.not.allocated(MARSH_BULK_DENS))                     &
 !     &                allocate(MARSH_BULK_DENS(Ngrids))
@@ -401,14 +406,14 @@
 !	   WRITE(out,130) 
 	   WRITE(out,130) PAR_FAC1(ng)
 	   WRITE(out,140) PAR_FAC2(ng)
-           WRITE(out,150) TDAYS_MARSH_GROWTH
-!	   WRITE(out,160) MARSH_BULK_DENS(ng)
+           WRITE(out,150) TDAYS_MARSH_GROWTH(ng)
            WRITE (out,160) NUGP(ng)
 	   WRITE (out,170) BMAX(ng)
 	   WRITE (out,180) CHIREF(ng)
 #  ifdef MARSH_BIOMASS_VEG 
            WRITE (out,190)
-	   WRITE (out,200) ALPHA_PDENS(ng), BETA_PDENS(ng),             &
+           WRITE (out,200)
+	   WRITE (out,210) ALPHA_PDENS(ng), BETA_PDENS(ng),             &
      &                     ALPHA_PHGHT(ng), BETA_PHGHT(ng),             & 
      &                     ALPHA_PDIAM(ng), BETA_PDIAM(ng) 
 #  endif
@@ -441,25 +446,25 @@
 !  110  FORMAT (1x,l1,2x,a,t29,a,i2.2,':',1x,a)
 # endif 
 # ifdef MARSH_TIDAL_RANGE_CALC
-  120  FORMAT ('Days after marsh production starts     = ', i4,/,a)
+  120  FORMAT ('Days after which MHW calc. starts     = ', i4,/,a)
 # endif
 # ifdef MARSH_VERT_GROWTH 
   130  FORMAT ('Parabolic growth factor 1              = ',e11.3,/,a)
   140  FORMAT ('Parabolic growth factor 2              = ',e11.3,/,a)
-  150  FORMAT ('Number of growing days for marsh veg.  = ',  i4,/,a)
-  160  FORMAT ('Marsh organic sed. bulk density (kg/m3)= ',e11.3,/,a)
+  150  FORMAT ('Number of growing days for marsh biomass  = ',e11.3,/,a)
+!  160  FORMAT ('Marsh organic sed. bulk density (kg/m3)= ',e11.3,/,a)
 !  130  FORMAT (/,1x,'par_fac1',5x,'par_fac2',7x,                        &
 !      &        'tdays_marsh_growth(tdays)',3x,'marsh_bulk_dens(kg/m3)'/) 
 !  140  FORMAT ((1x,1p,e11.4),(2x,1p,e11.4),(5x,1p,e11.3),(5x,1p,e11.4))
-  170  FORMAT ('Fraction of below ground biomass       = ',e11.3,/,a)
-  180  FORMAT ('Peak biomass (kg/m2)                   = ',e11.3,/,a)
-  190  FORMAT ('Fraction of recalcitrant Carbon        = ',e11.3,/,a)
+  160  FORMAT ('Fraction of below ground biomass       = ',e11.3,/,a)
+  170  FORMAT ('Peak biomass (kg/m2)                   = ',e11.3,/,a)
+  180  FORMAT ('Fraction of recalcitrant Carbon        = ',e11.3,/,a)
 #  ifdef MARSH_BIOMASS_VEG
-  200  FORMAT (/,'Marsh vegetation growth parameters: ',/,a)
-  210  FORMAT (/,2x,'alpha_pdens', 4x,'beta_pdens',                     &
+  190  FORMAT (/,'Marsh vegetation growth parameters: ',/,a)
+  200  FORMAT (/,2x,'alpha_pdens', 4x,'beta_pdens',                     &
       &         4x, 'alpha_phght',4x,'beta_phght',                      &
       &         4x,'alpha_pdiam', 4x,'beta_pdiam'/)
-  220  FORMAT (6(3x,1p,e11.3))
+  210  FORMAT (6(3x,1p,e11.3))
 #  endif 
 # endif 
 #endif

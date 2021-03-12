@@ -136,7 +136,7 @@
 # endif 
 # if defined MARSH_VERT_GROWTH 
       real(r8), allocatable :: PAR_FAC1(:), PAR_FAC2(:)
-      integer               :: TDAYS_MARSH_GROWTH
+      real(r8), allocatable :: TDAYS_MARSH_GROWTH(:)
 !      real(r8), allocatable :: MARSH_BULK_DENS(:)
       real(r8), allocatable :: NUGP(:)
       real(r8), allocatable :: BMAX(:)
