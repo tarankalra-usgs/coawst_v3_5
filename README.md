@@ -31,15 +31,19 @@ This software is COAWST version 3.5. The user is recommended to read the User Ma
 
 ***Matlab codes to test or understand the vertical growth formulations:***
 1. check_max_Bpeak_parabola.m 
-Function of parabola with a simple matlab code. The parabola determines the range of growth for marsh cells. 
+
+-> Function of parabola with a simple matlab code. The parabola determines the range of growth for marsh cells. 
 
 2. coawst_adaptation_Kirwan_fixedMHW.m
-Check Kirwan's formulation with fixed MHW and fixed MLW. 
+
+-> Check Kirwan's formulation with fixed MHW and fixed MLW. 
 
 3. coawst_adaptation_Kirwan.m  
-Check Kirwan's formulation with 2 output marsh cells from COAWST output that provide
+
+-> Check Kirwan's formulation with 2 output marsh cells from COAWST output that provide
 MHW from model. Matfile is "point12_data_mvt.mat" for getting the COAWST data. 
 
 4. coawst_adaptation_Mckee.m
-Check Mckee's formulation with 2 output marsh cells from COAWST output that provide 
+
+-> Check Mckee's formulation with 2 output marsh cells from COAWST output that provide 
 MHW from model. Matfile is "point12_data_mvt.mat" for getting the COAWST data. 
