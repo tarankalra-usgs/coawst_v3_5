@@ -208,7 +208,7 @@
           IF(tdays(ng).lt.tdays_marsh_growth(ng)) THEN 
 #  if defined MARSH_KIRWAN_FORMULATION
 ! Kirwan formulation. 
-#   if defined MARSH_TIDAL_RANGE_CAL 
+#   if defined MARSH_TIDAL_RANGE_INTERNAL
 ! Depend on internal calculation. 
             Dmin=marsh_high_water(i,j)
 ! Assume MTR=2*MHW
@@ -222,7 +222,7 @@
 !
 #  if defined MARSH_MCKEE_FORMULATION 
 ! Mckee formulation. 
-#   if defined MARSH_TIDAL_RANGE_CAL 
+#   if defined MARSH_TIDAL_RANGE_INTERNAL
 ! Depend on internal calculation. 
             Samp=(marsh_high_water(i,j))
 #   else 
